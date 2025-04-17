@@ -23,6 +23,17 @@
 )
 ;;;; Para los datos calculados se puede utilizar: https://www.labdeiters.com/nutricalculadora/ o https://fitia.app/buscar/alimentos-y-recetas/
 
+(deftemplate propiedad_receta
+   (slot tipo)         ;tipo de propiedad especial que tenga la receta
+   (slot receta)       ;nombre de la receta
+   (slot ingrediente)  ;ingredientes principales
+)
+
+(deftemplate receta-seleccionada
+   (slot nombre)
+)
+
+
 
 ;;; Crear un fichero de texto recetas.txt en el mismo directorio de recetas.clp y copiar el contenido del archivo compartido
 
@@ -31,7 +42,6 @@
 =>
 (load-facts "recetas.txt")
 )
-
 
 (defrule guarda_recetas
 (declare (salience -1000))
@@ -74,6 +84,7 @@
 (es_un_tipo_de yogur lacteos)
 (es_un_tipo_de atun pescado) 
 (es_un_tipo_de salmon pescado)    
+(es_un_tipo_de salmon_ahumado pescado) 
 (es_un_tipo_de boquerones pescado)
 (es_un_tipo_de sardinas pescado)
 (es_un_tipo_de salchichon embutidos)
@@ -253,19 +264,25 @@
   (es_un_tipo_de bacon carne)
   (es_un_tipo_de salchicha carne)
   (es_un_tipo_de pato carne)
-
-  
-  ;carnes tipos
-  (es_un_tipo_de pollo carne_blanca)
-  (es_un_tipo_de pavo carne_blanca)
-  (es_un_tipo_de conejo carne_blanca)
-  (es_un_tipo_de cerdo carne_roja)
-  (es_un_tipo_de ternera carne_roja)
-  (es_un_tipo_de cordero carne_roja)
+  (es_un_tipo_de pollo carne)
+  (es_un_tipo_de pavo carne)
+  (es_un_tipo_de conejo carne)
+  (es_un_tipo_de cerdo carne)
+  (es_un_tipo_de ternera carne)
+  (es_un_tipo_de cordero carne)
   (es_un_tipo_de carne_picada carne)
   (es_un_tipo_de jamon carne)
   (es_un_tipo_de bacon carne)
   (es_un_tipo_de salchicha carne)
+  (es_un_tipo_de chistorra carne)
+  (es_un_tipo_de bistec carne)
+  (es_un_tipo_de morcilla carne)
+  (es_un_tipo_de chorizo carne)
+  (es_un_tipo_de panceta carne)
+  (es_un_tipo_de bondiola carne)
+  (es_un_tipo_de lomo carne)
+  (es_un_tipo_de matambre carne)
+  (es_un_tipo_de jamon_serrano carne)
 
   ;pescado y marisco
   (es_un_tipo_de salmon pescado)
@@ -275,12 +292,14 @@
   (es_un_tipo_de boquerones pescado)
   (es_un_tipo_de sardinas pescado)
   (es_un_tipo_de langostinos marisco)
+  (es_un_tipo_de langostino marisco)
   (es_un_tipo_de gambas marisco)
   (es_un_tipo_de mejillones marisco)
   (es_un_tipo_de almejas marisco)
   (es_un_tipo_de calamares marisco)
   (es_un_tipo_de pulpo marisco)
   (es_un_tipo_de marisco pescado)
+  (es_un_tipo_de camarones pescado)
 
   ;lácteos
   (es_un_tipo_de leche lacteos)
@@ -378,131 +397,14 @@
   (es_un_tipo_de harina gluten)
   (es_un_tipo_de trigo gluten)
   (es_un_tipo_de pan gluten)
-  (es_un_tipo_de pasta gluten)
+  (es_un_tipo_de pan_rallado gluten)
+  (es_un_tipo_de espaguetis gluten)
+  (es_un_tipo_de macarrones gluten)
 
 )
 
 ;;agrupados por grupos directamente
-(deffacts conocimiento_clasificado_por_grupos
 
-  ;; Carnes
-  (es-carne (name pollo))
-  (es-carne (name pavo))
-  (es-carne (name ternera))
-  (es-carne (name cerdo))
-  (es-carne (name cordero))
-  (es-carne (name pato))
-  (es-carne (name carne_picada))
-  (es-carne (name jamon))
-  (es-carne (name bacon))
-  (es-carne (name salchicha))
-  (es-carne (name hamburguesa))
-
-  ;; Embutidos
-  (es-embutido (name chorizo))
-  (es-embutido (name salchichon))
-  (es-embutido (name mortadela))
-  (es-embutido (name jamon_serrano))
-  (es-embutido (name jamon_de_york))
-
-  ;; Pescado
-  (es-pescado (name atun))
-  (es-pescado (name salmon))
-  (es-pescado (name merluza))
-  (es-pescado (name bacalao))
-  (es-pescado (name boquerones))
-  (es-pescado (name sardinas))
-
-  ;; Marisco
-  (es-marisco (name langostinos))
-  (es-marisco (name gambas))
-  (es-marisco (name mejillones))
-  (es-marisco (name almejas))
-  (es-marisco (name calamares))
-  (es-marisco (name pulpo))
-
-  ;; Lácteos
-  (es-lacteo (name leche))
-  (es-lacteo (name yogur))
-  (es-lacteo (name queso))
-  (es-lacteo (name nata))
-  (es-lacteo (name mantequilla))
-
-  ;; Gluten
-  (es-gluten (name trigo))
-  (es-gluten (name harina))
-  (es-gluten (name pan))
-  (es-gluten (name pasta))
-  (es-gluten (name cebada))
-  (es-gluten (name centeno))
-
-  ;; Legumbres
-  (es-legumbre (name lentejas))
-  (es-legumbre (name garbanzos))
-  (es-legumbre (name judias_blancas))
-  (es-legumbre (name soja))
-
-  ;; Frutas
-  (es-fruta (name platano))
-  (es-fruta (name manzana))
-  (es-fruta (name pera))
-  (es-fruta (name fresa))
-  (es-fruta (name melon))
-  (es-fruta (name sandia))
-  (es-fruta (name kiwi))
-  (es-fruta (name mango))
-  (es-fruta (name arandanos))
-  (es-fruta (name frutos_rojos))
-  (es-fruta (name limon))
-  (es-fruta (name naranja))
-
-  ;; Verduras
-  (es-verdura (name zanahoria))
-  (es-verdura (name cebolla))
-  (es-verdura (name ajo))
-  (es-verdura (name calabacin))
-  (es-verdura (name berenjena))
-  (es-verdura (name espinacas))
-  (es-verdura (name acelgas))
-  (es-verdura (name lechuga))
-  (es-verdura (name brocoli))
-  (es-verdura (name coliflor))
-  (es-verdura (name tomate))
-  (es-verdura (name pimiento_rojo))
-  (es-verdura (name pimiento_verde))
-
-  ;; Frutos secos
-  (es-fruto_seco (name nueces))
-  (es-fruto_seco (name almendra))
-  (es-fruto_seco (name pistachos))
-  (es-fruto_seco (name cacahuetes))
-
-  ;; Dulces
-  (es-dulce (name azucar))
-  (es-dulce (name miel))
-  (es-dulce (name chocolate))
-  (es-dulce (name mermelada))
-  (es-dulce (name sirope))
-
-  ;; Condimentos y especias
-  (es-condimento (name sal))
-  (es-condimento (name pimienta))
-  (es-condimento (name pimenton))
-  (es-condimento (name curry))
-  (es-condimento (name curcuma))
-  (es-condimento (name laurel))
-  (es-condimento (name ajo))
-  (es-condimento (name perejil))
-  (es-condimento (name albahaca))
-  (es-condimento (name azafran))
-
-  ;; Bebidas
-  (es-bebida (name agua))
-  (es-bebida (name vino))
-  (es-bebida (name cerveza))
-  (es-bebida (name zumo))
-  (es-bebida (name leche_vegetal))
-)
 
 
 
@@ -521,8 +423,8 @@
   (receta (nombre ?nombre) (ingredientes $? ?ing $?))
   (test (str-index (lowcase (str-cat ?ing)) (lowcase ?nombre))) ; el ingrediente está en el nombre (case insensitive)
   =>
-  (printout t "El ingrediente principal de " ?nombre " es " ?ing crlf)
-  (assert (propiedad_receta ingrediente_relevante ?nombre ?ing))
+  ;(printout t "El ingrediente principal de " ?nombre " es " ?ing crlf)
+  (assert (propiedad_receta (tipo ingrediente_principal) (receta ?nombre) (ingrediente ?ing)))
 )
 
 ;que este en el nombre parcialmente
@@ -530,24 +432,23 @@
 ;para evitar duplicados con la regla anterior vamos a comprobar que no este ya de antes
 (defrule coincidencia-parcial-nombre
   (receta (nombre ?nombre) (ingredientes $? ?ing $?))
-  (not (propiedad_receta ingrediente_relevante ?nombre ?ing)) ; evitamos duplicados
-  (test (str-index (lowcase (sub-string 1 15 ?ing)) (lowcase ?nombre)))
+  (not (propiedad_receta (receta ?nombre) (ingrediente ?ing))) ; evitamos duplicados
+  (test (str-index (lowcase (sub-string 1 15 ?ing)) (lowcase ?nombre))) ; comprobamos coincidencia parcial
   (not (es_un_tipo_de ?ing condimento)) ; evitamos condimentos como ingredientes principales
   =>
-  (printout t "Ingrediente principal de " ?nombre " es " ?ing " por nombre parcial encontrado" crlf)
-  (assert (propiedad_receta ingrediente_relevante ?nombre ?ing))
+  ;(printout t "Ingrediente principal de " ?nombre " es " ?ing " por nombre parcial encontrado" crlf)
+  (assert (propiedad_receta (tipo ingrediente_principal) (receta ?nombre) (ingrediente ?ing))) 
 )
 
 
-
-; si hay 3 ingredientes o menos son todos principales
+;si hay 3 ingredientes o menos son todos principales
 (defrule pocos-ingredientes-principales
   (receta (nombre ?nombre) (ingredientes $?lista))
   (test (<= (length$ ?lista) 3))
   =>
   (foreach ?ing ?lista
-    (printout t "El ingrediente " ?ing " en la receta " ?nombre " es ingrediente principal por tener menos de 3 ingredientes." crlf)
-    (assert (propiedad_receta ingrediente_relevante ?nombre ?ing))
+    ;(printout t "El ingrediente " ?ing " en la receta " ?nombre " es ingrediente principal por tener menos de 3 ingredientes." crlf)
+    (assert (propiedad_receta (tipo ingrediente_principal) (receta ?nombre) (ingrediente ?ing)))
   )
 )
 
@@ -555,11 +456,11 @@
 
 ; 2) Los condimentos no son ingredientes principales
 (defrule evitar-condimentos-como-principales
-  ?f <- (propiedad_receta ingrediente_relevante ?nombre ?ing)
-  (es_un_tipo_de ?ing condimento)
+  ?f <- (propiedad_receta (receta ?nombre) (ingrediente ?ing)) ; comprobamos que es un ingrediente
+  (es_un_tipo_de ?ing condimento) ; si es un condimento, lo eliminamos
   =>
-  (printout t "El ingrediente " ?ing " en la receta " ?nombre " es un condimento, no se considera ingrediente principal." crlf)
-  (retract ?f)
+  ;(printout t "El ingrediente " ?ing " en la receta " ?nombre " es un condimento, no se considera ingrediente principal." crlf)
+  (retract ?f) ; eliminamos el hecho
 )
 
 
@@ -568,41 +469,43 @@
 ;;para carne:
 (defrule carne-es-principal-si-no-hay-otros
   (receta (nombre ?nombre) (ingredientes $?ings))
-  (not (propiedad_receta ingrediente_relevante ?nombre ?))
-  ?f <- (es_un_tipo_de ?ing carne)
-  (test (member$ ?ing ?ings))
+  (not (propiedad_receta (receta ?nombre) (ingrediente ?ing))) ; no debe haber ingredientes principales aún
+  ?f <- (es_un_tipo_de ?ing carne) ; si encontramos carne
+  (test (member$ ?ing ?ings)) ; y está en los ingredientes
   =>
-  (printout t "El ingrediente " ?ing " en la receta " ?nombre " es carne y no hay otros ingredientes principales." crlf)
-  (assert (propiedad_receta ingrediente_relevante ?nombre ?ing))
+  ;(printout t "El ingrediente " ?ing " en la receta " ?nombre " es carne y no hay otros ingredientes principales." crlf)
+  (assert (propiedad_receta (tipo ingrediente_principal) (receta ?nombre) (ingrediente ?ing))) ; aniadimos carne como ingrediente principal
 )
 
 ;; para pescado: 
 (defrule pescado-es-principal-si-no-hay-otros
   (receta (nombre ?nombre) (ingredientes $?ings))
-  (not (propiedad_receta ingrediente_relevante ?nombre ?))
-  ?f <- (es_un_tipo_de ?ing pescado)
-  (test (member$ ?ing ?ings))
+  (not (propiedad_receta (receta ?nombre) (ingrediente ?ing))) ; no debe haber ingredientes principales aún
+  ?f <- (es_un_tipo_de ?ing pescado) ; si encontramos pescado
+  (test (member$ ?ing ?ings)) ; y está en los ingredientes
   =>
-  (printout t "El ingrediente " ?ing " en la receta " ?nombre " es pescado y no hay otros ingredientes principales." crlf)
-  (assert (propiedad_receta ingrediente_relevante ?nombre ?ing))
+  ;(printout t "El ingrediente " ?ing " en la receta " ?nombre " es pescado y no hay otros ingredientes principales." crlf)
+  (assert (propiedad_receta (tipo ingrediente_principal) (receta ?nombre) (ingrediente ?ing))) ; añadimos pescado como ingrediente principal
 )
+
 
 ;;;PARTE 2
 ;;;modificar las recetas completando cual seria el/los tipo_plato asociados a una receta, 
 ;;;;;;;; especialmente para el caso de que no incluya ninguno
 
-;;he pensado en clasificar ingredientes caracteristicos
-;;si tiene carne o pescado es un plato principal
+;he pensado en clasificar ingredientes caracteristicos
+;si tiene carne o pescado es un plato principal
 (defrule deducir-plato-principal
   (receta (nombre ?nombre) (tipo_plato $?tipo&:(not (member$ plato_principal ?tipo))) (ingredientes $?ings))
   (or 
-    (exists (es_un_tipo_de ?i carne) (test (member$ ?i ?ings)))
-    (exists (es_un_tipo_de ?j pescado) (test (member$ ?j ?ings)))
+    (test (member$ carne ?ings)) ; si tiene carne
+    (test (member$ pescado ?ings)) ; o si tiene pescado
   )
   =>
-  ;(printout t "Asignado tipo_plato plato_principal a receta " ?nombre crlf)
-  (assert (propiedad_receta tipo_plato plato_principal ?nombre))
+  (assert (propiedad_receta (tipo plato_principal) (receta ?nombre))) ; asignamos el tipo plato_principal
 )
+
+
 
 ;;he pensado que todo lo que tenga pan a secas sea acompañamiento
 (defrule deducir-acompanamiento
@@ -610,7 +513,7 @@
   (test (member$ pan ?ings))
   =>
   ;(printout t "Asignado tipo_plato acompanamiento a receta " ?nombre " porque contiene pan." crlf)
-  (assert (propiedad_receta tipo_plato acompanamiento ?nombre))
+  (assert (propiedad_receta (tipo acompaniamento) (receta ?nombre)))
 )
 
 
@@ -621,7 +524,7 @@
   (test (subsetp ?ings (create$ lechuga tomate zanahoria cebolla espinacas calabacin berenjena)))
   =>
   ;(printout t "Asignado tipo_plato entrante a receta " ?nombre " porque contiene solo vegetales y pocos ingredientes." crlf)
-  (assert (propiedad_receta tipo_plato entrante ?nombre))
+  (assert (propiedad_receta (tipo entrante) (receta ?nombre)))
 )
 
 ;;para el primer plato suele llevar algo de legumbres, arroz o pasta
@@ -630,7 +533,7 @@
   (test (or (member$ arroz ?ings) (member$ lentejas ?ings) (member$ pasta ?ings)))
   =>
   ;(printout t "Asignado tipo_plato primer_plato a receta " ?nombre crlf)
-  (assert (propiedad_receta tipo_plato primer_plato ?nombre))
+  (assert (propiedad_receta (tipo primer_plato) (receta ?nombre)))
 )
 
 ;;para la categoria de postre pongo que si tiene un ingrediente dulce
@@ -640,7 +543,7 @@
   (test (member$ ?i ?ings))
   =>
   ;(printout t "Asignado tipo_plato postre a receta " ?nombre " porque contiene el ingrediente dulce: " ?i crlf)
-  (assert (propiedad_receta tipo_plato postre ?nombre))
+  (assert (propiedad_receta (tipo postre) (receta ?nombre)))
 )
 
 ;;para la categoria de desayuno_merienda voy a incluir todas las recetas que tienen fruta
@@ -653,108 +556,124 @@
   (test (neq ?i naranja)) ; excluimos naranja
   =>
   ;(printout t "Asignado tipo_plato desayuno_merienda a receta " ?nombre " porque contiene fruta: " ?i crlf)
-  (assert (propiedad_receta tipo_plato desayuno_merienda ?nombre))
+  (assert (propiedad_receta (tipo desayuno_merienda) (receta ?nombre)))
 )
 
 ;;; PARTE 3
 ;;; si una receta es: vegana, vegetariana, de dieta, picante, sin gluten o sin lactosa
 ;;una receta vegana no tiene lacteos, ni huevos, ni carne, ni pescado
-(defrule receta-vegana
-(declare (salience 50))
-   (receta (nombre ?n) (ingredientes $?ingredientes))
-   (not (es-carne (name ?i&:(member$ ?i $?ingredientes))))
-   (not (es-pescado (name ?i&:(member$ ?i $?ingredientes))))
-   (not (es-marisco (name ?i&:(member$ ?i $?ingredientes))))
-   (not (es-lacteo (name ?i&:(member$ ?i $?ingredientes))))
-   (not (es-embutido (name ?i&:(member$ ?i $?ingredientes))))
-   (not (find$ "huevo" $?ingredientes))
-   =>
-   (assert (propiedad_receta (tipo es_vegana) (receta ?n)))
-   ;(printout t "La receta " ?n " es vegana." crlf)
+(defrule receta-no-vegana
+   (declare (salience -4)) 
+   (receta (nombre ?n) (ingredientes $? ?i $?))
+   (or (es_un_tipo_de ?i carne)
+      (es_un_tipo_de ?i pescado)
+      (es_un_tipo_de ?i embutidos)
+      (es_un_tipo_de ?i fiambres)
+      (es_un_tipo_de ?i lacteos)
+      (es_un_tipo_de ?i huevos))                
+  =>
+  (assert (propiedad_receta (tipo no_es_vegana) (receta ?n)))
+  ;(printout t ?n " no es vegana " crlf)
 )
 
-
-
-
-
-
-
+;hacemos el not de la anterior y añadimos que en el nombre de la receta no ponga carne/pescado
+(defrule receta-vegana
+   (declare (salience -5))
+   (receta (nombre ?n))
+   (not (propiedad_receta (tipo no_es_vegana) (receta ?n)))
+   =>
+   (assert (propiedad_receta (tipo es_vegana) (receta ?n)))
+   ;(printout t ?n " es vegano " crlf)
+)
 
 
 ;;una receta vegetariana es que no tiene pescado ni carne pero si puede tener lacteos o huevos
+(defrule receta-no-vegetariana
+   (declare (salience -6)) 
+   (receta (nombre ?n) (ingredientes $? ?i $?))
+   (or (es_un_tipo_de ?i carne)
+      (es_un_tipo_de ?i pescado)
+      (es_un_tipo_de ?i embutidos)
+      (es_un_tipo_de ?i fiambres))                           
+  =>
+  (assert (propiedad_receta (tipo no_es_vegetariana) (receta ?n)))
+  ;(printout t ?n " no es vegetariano " crlf)
+)
+
 (defrule receta-vegetariana
-(declare (salience 50))
-   (receta (nombre ?n) (ingredientes $?ingredientes))
-   (not (es-carne (name ?i&:(member$ ?i $?ingredientes))))
-   (not (es-pescado (name ?i&:(member$ ?i $?ingredientes))))
-   (not (es-marisco (name ?i&:(member$ ?i $?ingredientes))))
-   (not (es-embutido (name ?i&:(member$ ?i $?ingredientes))))
+   (declare (salience -7))
+   (receta (nombre ?n))
+   (not (propiedad_receta (tipo no_es_vegetariana) (receta ?n)))
    =>
    (assert (propiedad_receta (tipo es_vegetariana) (receta ?n)))
-   ;(printout t "La receta " ?n " es vegetariana." crlf)
+   ;(printout t ?n " es vegetariano " crlf)
 )
 
 
 
-
-;;sin gluten es que no tenga ni harina ni trigo(defrule es_sin_gluten
-(defrule receta-sin-gluten
-  (declare (salience 30))
-  (receta (nombre ?n) (ingredientes $?ingredientes))
-  (not (es-gluten (name ?i&:(member$ ?i $?ingredientes))))
-  =>
-  (assert (propiedad_receta es_sin_gluten ?n))
-  (printout t "La receta " ?n " es SIN GLUTEN." crlf)
+;;sin gluten es que no tenga ni harina ni trigo
+(defrule receta-gluten
+   (declare (salience -10))
+   (receta (nombre ?n) (ingredientes $? ?i $?))
+   (es_un_tipo_de ?i cereales)
+   =>
+   ;(printout t ?n " no es para celiacos " crlf)
+   (assert (propiedad_receta (tipo es_con_gluten) (receta ?n)))
 )
 
+(defrule receta-no-gluten
+   (declare (salience -11))
+   (receta (nombre ?n))
+   (not (propiedad_receta (tipo es_con_gluten) (receta ?n)))
+   =>
+   ;(printout t ?n " es para celiacos " crlf)
+   (assert (propiedad_receta (tipo es_sin_gluten) (receta ?n)))
+)
 
 
 ;;sin lactosa es que no tenga nada de lacteos
-(defrule receta-sin-lactosa
-  (declare (salience 30))
-  (receta (nombre ?n) (ingredientes $?ingredientes))
-  (not (es-lacteo (name ?i&:(member$ ?i $?ingredientes))))
-  =>
-  (assert (propiedad_receta es_sin_lactosa ?n))
-  (printout t "La receta " ?n " es SIN LACTOSA." crlf)
+(defrule receta-lactosa
+   (declare (salience -12))
+   (receta (nombre ?n) (ingredientes $? ?i $?))
+   (es_un_tipo_de ?i lacteos)
+   =>
+   ;(printout t ?n " no es intolerantes a la lactosa " crlf)
+   (assert (propiedad_receta (tipo es_con_lactosa) (receta ?n)))
+)
+
+(defrule receta-no-lactosa
+   (declare (salience -13))
+   (receta (nombre ?n))
+   (not (propiedad_receta (tipo es_con_lactosa) (receta ?n)))
+   =>
+   ;(printout t ?n " es para intolerantes a la lactosa " crlf)
+   (assert (propiedad_receta (tipo es_sin_lactosa) (receta ?n)))
 )
 
 
-
-;; si es picante es si tiene pimenton picante o guindilla
+;; si es picante en el nombre deberia de poner picante o en un ingrediente
 (defrule receta-picante
-  (declare (salience 30))
-  (receta (nombre ?n) (ingredientes $?ingredientes))
-  (or (member$ pimenton_picante $?ingredientes)
-      (member$ guindilla $?ingredientes))
+  (declare (salience -14))
+  (receta (nombre ?n) (ingredientes $?ing))
   =>
-  (assert (propiedad_receta es_picante ?n))
-  (printout t "La receta " ?n " es PICANTE." crlf)
+  (foreach ?ingrediente ?ing
+      (if (str-index "picante" ?ingrediente)
+         then
+         (assert (propiedad_receta (tipo es_picante) (receta ?n)))
+         ;(printout t "La receta " ?n " es picante." crlf)
+      )
+   )
 )
 
 
-;;de dieta es si el modo de coccion es al vapor, baja en grasa o dice light
+;;para ver si es de diesta voy a ver si tiene menos de 350 calorias
 (defrule receta-de-dieta
-  (declare (salience 30))
-  (receta (nombre ?n) (tipo_copcion al_vapor))
+  (declare (salience -15))
+  (receta (nombre ?n) (Calorias ?c&:(< ?c 350)))
   =>
-  (assert (propiedad_receta es_de_dieta ?n))
-  (printout t "La receta " ?n " es DE DIETA (por cocción al vapor)." crlf)
+  (assert (propiedad_receta (tipo es_de_dieta) (receta ?n)))
+  ;(printout t "La receta " ?n " es de dieta (pocas calorias)." crlf)
 )
-
-
-
-
-
-
-
-
-
-
-;; pedir al usuario una receta
-;; que diga los ingredientes principales y si tiene alguna propiedad
-
-
 
 
 ;;;FORMATO DE LOS HECHOS: 
@@ -768,11 +687,76 @@
 ;       (propiedad_receta es_de_dieta ?r)
 
 
+;ahora voy a hacer una interaccion con el usuario para que sea mas comodo de entender mi programa:
+;le voy a pedir al usuario una receta
+;el programa va a decir los ingredientes principales y si tiene alguna propiedad (vegana, vegetariana, sin lactosa, para celiacos, picante o de dieta)
+
+;regla para pedir el nombre de la receta al usuario
+(defrule pedir-nombre-receta
+   (declare (salience -16))
+   =>
+   (printout t "Introduce el nombre de la receta: ")
+   (bind ?nombre (readline))
+   (assert (receta-pedida ?nombre))  ;almacenamos el nombre de la receta solicitada
+   (assert (Tarea receta-no-encontrada)) ;asignamos una tarea para ver si la receta existe
+)
+
+;regla para ver si la receta existe
+(defrule ver-existencia-receta
+   (declare (salience -17))
+   (receta (nombre ?nombre))
+   (receta-pedida ?nombre)
+   ?f <- (Tarea receta-no-encontrada)
+   =>
+   (printout t "Receta " ?nombre " encontrada." crlf)
+   (retract ?f) ;eliminamos la tarea si la receta es encontrada
+)
+
+;regla para manejar cuando la receta no exista
+(defrule receta-no-encontrada
+   (declare (salience -18))
+   (Tarea receta-no-encontrada)
+   (receta-pedida ?nombre)
+   =>
+   (printout t "La receta " ?nombre " no se encuentra en el fichero recetas.txt." crlf)
+)
 
 
+;mostramos los ingredientes principales de la receta pedida
+(deffunction mostrar-ingredientes-principales (?receta ?lista-ingredientes)
+   (printout t "Ingredientes principales de la receta:" crlf)
+   (foreach ?ing ?lista-ingredientes
+      (if (any-factp ((?f propiedad_receta))
+            (and (eq ?f:tipo ingrediente_principal)
+                 (eq ?f:receta ?receta)
+                 (eq ?f:ingrediente ?ing)))
+         then
+            (printout t " - " ?ing crlf))))
+
+;mostramos las propiedades especiales de la receta
+(deffunction mostrar-propiedades-extra (?receta)
+   (bind ?prop-list (create$))
+   (foreach ?tipo (create$ es_vegana es_vegetariana es_sin_gluten es_picante es_sin_lactosa es_de_dieta)
+      (if (any-factp ((?f propiedad_receta))
+            (and (eq ?f:tipo ?tipo)
+                 (eq ?f:receta ?receta)))
+         then
+            (bind ?prop-list (insert$ ?prop-list 1 ?tipo))))
+   (if (neq (length$ ?prop-list) 0)
+      then
+         (printout t "Propiedades especiales: " (implode$ ?prop-list ) crlf)
+      else
+         (printout t "Sin propiedades especiales." crlf)))
 
 
-
- 
+ (defrule mostrar-ingredientes-y-propiedades
+   (declare (salience -19))
+   (receta-pedida ?nombre)
+   ?r <- (receta (nombre ?nombre) (ingredientes $?ings) (tipo_plato ?tipo))
+   =>
+   (printout t "Tipo de plato: " ?tipo crlf)
+   (mostrar-propiedades-extra ?nombre) ;mostramos las propiedades adicionales
+   (mostrar-ingredientes-principales ?nombre ?ings) ;mostramos los ingredientes relevantes
+)
 
  
