@@ -1,5 +1,6 @@
-;;;; AÑADIR LA INFORMACION DE AL MENOS 2 RECETAS NUEVAS al archivo compartido recetas.txt (https://docs.google.com/document/d/15zLHIeCEUplwsxUxQU66LsyKPY9n9p5v1bmi8M85YlU/edit?usp=sharing)
-;;;;;recoger los datos de https://www.recetasgratis.net  en el siguiente formato
+;(defmodule DEDUCIR
+;  (export ?ALL))
+
 (deftemplate receta
 (slot nombre)   ; necesario
 (slot introducido_por) ; necesario
@@ -21,7 +22,6 @@
 (slot Fibra) ; calculado necesario
 (slot Colesterol) ; calculado necesario
 )
-;;;; Para los datos calculados se puede utilizar: https://www.labdeiters.com/nutricalculadora/ o https://fitia.app/buscar/alimentos-y-recetas/
 
 (deftemplate propiedad_receta
    (slot tipo)         ;tipo de propiedad especial que tenga la receta
@@ -33,19 +33,20 @@
    (slot nombre)
 )
 
-;;; Crear un fichero de texto recetas.txt en el mismo directorio de recetas.clp y copiar el contenido del archivo compartido
+
+(defrule iniciar-deduccion
+  (declare (salience 1001))
+   =>
+   (assert (modulo deducir-propiedades))
+)
 
 (defrule carga_recetas
 (declare (salience 1000))
+(modulo deducir-propiedades)
 =>
 (load-facts "recetas.txt")
 )
 
-(defrule guarda_recetas
-(declare (salience -1000))
-=>
-(save-facts "recetas_saved.txt")
-)
 
 ;;;;;;;;;;Cargo conocimiento anterior y mismo
 (deffacts piramide_alimentaria
@@ -153,6 +154,7 @@
 
 
 (defrule componiendo_es_un_tipo_de
+(modulo deducir-propiedades)
 (es_un_tipo_de ?x ?y)
 (es_un_tipo_de ?y ?z)
 =>
@@ -160,12 +162,14 @@
 )
 
 (defrule deducir_grupo_por_piramide
+(modulo deducir-propiedades)
 (nivel_piramide_alimentaria ?g ?) ; hay una ? sola porque sabemos que por sintaxis es asi pero no la vamos a utilizar ni almacenar en esta regla
 =>
 (assert (es_grupo_alimentos ?g))
 )
 
 (defrule superclase_grupos_son_grupos
+(modulo deducir-propiedades)
 (es_grupo_alimentos ?g)
 (es_un_tipo_de ?g ?x)
 (test (neq ?x condimento)) ; no igual 
@@ -174,6 +178,7 @@
 )
 
 (defrule es_alimento
+(modulo deducir-propiedades)
 (es_un_tipo_de ?a ?g)
 (es_grupo_alimentos ?g)
 =>
@@ -181,6 +186,7 @@
 )
 
 (defrule deducir_es_un_tipo_de
+(modulo deducir-propiedades)
 (es_grupo_alimentos ?g)
 (or (alimento ?a) (es_grupo_alimentos ?a))
 (test (neq ?a ?g))
@@ -196,6 +202,7 @@
 
 ; con esta regla no se permiten grupos y alimentos a la vez
 (defrule de_alimento_a_grupo
+(modulo deducir-propiedades)
 ?f <- (es_alimento ?a)
 (es_un_tipo_de ?x ?a)
 =>
@@ -205,6 +212,7 @@
 
 (defrule retractar_grupo_como_alimento
 (declare (salience -2))
+(modulo deducir-propiedades)
 ?f <- (es_alimento ?g)
 (es_grupo_alimentos ?g)
 =>
@@ -213,6 +221,7 @@
 
 (defrule retractar_grupos_sin_subgrupos
 (declare (salience -1)) ; para que me asegure que ya no hay mas por deducir y por tanto realmente no tiene subgrupo
+(modulo deducir-propiedades)
 ?f <- (es_grupo_alimentos ?g)
 (not (es_un_tipo_de ? ?g)) ; ? tiene que haber algo pero no me importa y no lo guardo
 =>
@@ -222,6 +231,7 @@
 ;casi siempre cuando hay un not tiene que estar ligado a un salience negativo
 
 (defrule agrupando_por_nombre
+(modulo deducir-propiedades)
 (es_un_tipo_de ?a1 ?g)
 (es_un_tipo_de ?a2 ?g)
 (test (neq ?a1 ?a2))
@@ -404,20 +414,9 @@
 ;;agrupados por grupos directamente
 
 
-
-
-
-;;;EJERCICIO: Añadir reglas para  deducir tal y como tu lo harias (usando razonamiento basado en conocimiento):
-;;;  1) cual o cuales son los ingredientes relevantes de una receta
-;;;  2) modificar las recetas completando cual seria el/los tipo_plato asociados a una receta, 
-;;;;;;;; especialmente para el caso de que no incluya ninguno
-;;;  3) si una receta es: vegana, vegetariana, de dieta, picante, sin gluten o sin lactosa
-
-;;;PARTE 1-DEDUCIR INGREDIENTES PRINCIPALES DE UNA RECETA
-; Mis ideas: 
 ; Si un alimento aparece en el nombre, seguramente sea un ingrediente principal
-
 (defrule ingrediente-en-nombre
+  (modulo deducir-propiedades)
   (receta (nombre ?nombre) (ingredientes $? ?ing $?))
   (test (str-index (lowcase (str-cat ?ing)) (lowcase ?nombre))) ; el ingrediente está en el nombre (case insensitive)
   =>
@@ -429,6 +428,7 @@
 ;una palabra del nombre de la receta esta en una parte del igrediente. Por ejemplo, si la receta es tortilla de patatas quiero que el ingrediente patatas_fritas se considere principal
 ;para evitar duplicados con la regla anterior vamos a comprobar que no este ya de antes
 (defrule coincidencia-parcial-nombre
+  (modulo deducir-propiedades)
   (receta (nombre ?nombre) (ingredientes $? ?ing $?))
   (not (propiedad_receta (receta ?nombre) (ingrediente ?ing))) ; evitamos duplicados
   (test (str-index (lowcase (sub-string 1 15 ?ing)) (lowcase ?nombre))) ; comprobamos coincidencia parcial
@@ -438,9 +438,9 @@
   (assert (propiedad_receta (tipo ingrediente_principal) (receta ?nombre) (ingrediente ?ing))) 
 )
 
-
 ;si hay 3 ingredientes o menos son todos principales
 (defrule pocos-ingredientes-principales
+  (modulo deducir-propiedades)
   (receta (nombre ?nombre) (ingredientes $?lista))
   (test (<= (length$ ?lista) 3))
   =>
@@ -451,9 +451,9 @@
 )
 
 
-
 ; 2) Los condimentos no son ingredientes principales
 (defrule evitar-condimentos-como-principales
+  (modulo deducir-propiedades)
   ?f <- (propiedad_receta (receta ?nombre) (ingrediente ?ing)) ; comprobamos que es un ingrediente
   (es_un_tipo_de ?ing condimento) ; si es un condimento, lo eliminamos
   =>
@@ -461,11 +461,10 @@
   (retract ?f) ; eliminamos el hecho
 )
 
-
-
 ; 3) Si un ingrediente es carne o pescado y no hay ingredientes principales seguramente sea un ingrediente principal
 ;;para carne:
 (defrule carne-es-principal-si-no-hay-otros
+  (modulo deducir-propiedades)
   (receta (nombre ?nombre) (ingredientes $?ings))
   (not (propiedad_receta (receta ?nombre) (ingrediente ?ing))) ; no debe haber ingredientes principales aún
   ?f <- (es_un_tipo_de ?ing carne) ; si encontramos carne
@@ -477,6 +476,7 @@
 
 ;; para pescado: 
 (defrule pescado-es-principal-si-no-hay-otros
+  (modulo deducir-propiedades)
   (receta (nombre ?nombre) (ingredientes $?ings))
   (not (propiedad_receta (receta ?nombre) (ingrediente ?ing))) ; no debe haber ingredientes principales aún
   ?f <- (es_un_tipo_de ?ing pescado) ; si encontramos pescado
@@ -486,7 +486,6 @@
   (assert (propiedad_receta (tipo ingrediente_principal) (receta ?nombre) (ingrediente ?ing))) ; añadimos pescado como ingrediente principal
 )
 
-
 ;;;PARTE 2
 ;;;modificar las recetas completando cual seria el/los tipo_plato asociados a una receta, 
 ;;;;;;;; especialmente para el caso de que no incluya ninguno
@@ -494,6 +493,7 @@
 ;he pensado en clasificar ingredientes caracteristicos
 ;si tiene carne o pescado es un plato principal
 (defrule deducir-plato-principal
+  (modulo deducir-propiedades)
   ?r <- (receta (nombre ?nombre) (tipo_plato $?tipo&:(not (member$ plato_principal ?tipo))) (ingredientes $?ings))
   (or 
     (test (member$ carne ?ings)) ; si tiene carne
@@ -508,6 +508,7 @@
 
 ;;he pensado que todo lo que tenga pan a secas sea acompañamiento
 (defrule deducir-acompanamiento
+  (modulo deducir-propiedades)
   ?r <- (receta (nombre ?nombre) (tipo_plato $?tipo&:(not (member$ acompanamiento ?tipo))) (ingredientes $?ings))
   (test (member$ pan ?ings))
   =>
@@ -519,6 +520,7 @@
 
 ;;para los entrantes creo que son los que solo tienen verdura y pocos ingredientes
 (defrule deducir-entrante
+  (modulo deducir-propiedades)
   ?r <- (receta (nombre ?nombre) (tipo_plato $?tipo&:(not (member$ entrante ?tipo))) (ingredientes $?ings))
   (test (<= (length$ ?ings) 4))
   (test (subsetp ?ings (create$ lechuga tomate zanahoria cebolla espinacas calabacin berenjena)))
@@ -530,6 +532,7 @@
 
 ;;para el primer plato suele llevar algo de legumbres, arroz o pasta
 (defrule deducir-primer-plato
+  (modulo deducir-propiedades)
   ?r <- (receta (nombre ?nombre) (tipo_plato $?tipo&:(not (member$ primer_plato ?tipo))) (ingredientes $?ings))
   (test (or (member$ arroz ?ings) (member$ lentejas ?ings) (member$ pasta ?ings)))
   =>
@@ -540,6 +543,7 @@
 
 ;;para la categoria de postre pongo que si tiene un ingrediente dulce
 (defrule deducir-postre-por-dulces
+  (modulo deducir-propiedades)
   ?r <- (receta (nombre ?nombre) (ingredientes $?ings) (tipo_plato $?tipo&:(not (member$ postre ?tipo))))
   (es_un_tipo_de ?i dulces)
   (test (member$ ?i ?ings))
@@ -552,6 +556,7 @@
 ;;para la categoria de desayuno_merienda voy a incluir todas las recetas que tienen fruta
 ;; las unicas frutas que voy a obviar son el limon y la naranja que si se utilizan mas en la cocina tradicional
 (defrule deducir-desayuno-merienda-por-fruta
+  (modulo deducir-propiedades)
   ?r <- (receta (nombre ?nombre) (ingredientes $?ings) (tipo_plato $?tipo&:(not (member$ desayuno_merienda ?tipo))))
   (es_un_tipo_de ?i fruta)
   (test (member$ ?i ?ings))
@@ -568,6 +573,7 @@
 ;;una receta vegana no tiene lacteos, ni huevos, ni carne, ni pescado
 (defrule receta-no-vegana
    (declare (salience -4)) 
+   (modulo deducir-propiedades)
    (receta (nombre ?n) (ingredientes $? ?i $?))
    (or (es_un_tipo_de ?i carne)
       (es_un_tipo_de ?i pescado)
@@ -583,6 +589,7 @@
 ;hacemos el not de la anterior y añadimos que en el nombre de la receta no ponga carne/pescado
 (defrule receta-vegana
    (declare (salience -5))
+   (modulo deducir-propiedades)
    (receta (nombre ?n))
    (not (propiedad_receta (tipo no_es_vegana) (receta ?n)))
    =>
@@ -594,6 +601,7 @@
 ;;una receta vegetariana es que no tiene pescado ni carne pero si puede tener lacteos o huevos
 (defrule receta-no-vegetariana
    (declare (salience -6)) 
+   (modulo deducir-propiedades)
    (receta (nombre ?n) (ingredientes $? ?i $?))
    (or (es_un_tipo_de ?i carne)
       (es_un_tipo_de ?i pescado)
@@ -606,6 +614,7 @@
 
 (defrule receta-vegetariana
    (declare (salience -7))
+   (modulo deducir-propiedades)
    (receta (nombre ?n))
    (not (propiedad_receta (tipo no_es_vegetariana) (receta ?n)))
    =>
@@ -618,6 +627,7 @@
 ;;sin gluten es que no tenga ni harina ni trigo
 (defrule receta-gluten
    (declare (salience -10))
+   (modulo deducir-propiedades)
    (receta (nombre ?n) (ingredientes $? ?i $?))
    (es_un_tipo_de ?i cereales)
    =>
@@ -627,6 +637,7 @@
 
 (defrule receta-no-gluten
    (declare (salience -11))
+   (modulo deducir-propiedades)
    (receta (nombre ?n))
    (not (propiedad_receta (tipo es_con_gluten) (receta ?n)))
    =>
@@ -638,6 +649,7 @@
 ;;sin lactosa es que no tenga nada de lacteos
 (defrule receta-lactosa
    (declare (salience -12))
+   (modulo deducir-propiedades)
    (receta (nombre ?n) (ingredientes $? ?i $?))
    (es_un_tipo_de ?i lacteos)
    =>
@@ -647,6 +659,7 @@
 
 (defrule receta-no-lactosa
    (declare (salience -13))
+   (modulo deducir-propiedades)
    (receta (nombre ?n))
    (not (propiedad_receta (tipo es_con_lactosa) (receta ?n)))
    =>
@@ -658,6 +671,7 @@
 ;; si es picante en el nombre deberia de poner picante o en un ingrediente
 (defrule receta-picante
   (declare (salience -14))
+  (modulo deducir-propiedades)
   (receta (nombre ?n) (ingredientes $?ing))
   =>
   (foreach ?ingrediente ?ing
@@ -673,6 +687,7 @@
 ;;para ver si es de diesta voy a ver si tiene menos de 350 calorias
 (defrule receta-de-dieta
   (declare (salience -15))
+  (modulo deducir-propiedades)
   (receta (nombre ?n) (Calorias ?c&:(< ?c 350)))
   =>
   (assert (propiedad_receta (tipo es_de_dieta) (receta ?n)))
@@ -690,77 +705,12 @@
 ;       (propiedad_receta es_sin_lactosa ?r)
 ;       (propiedad_receta es_de_dieta ?r)
 
-
-;ahora voy a hacer una interaccion con el usuario para que sea mas comodo de entender mi programa:
-;le voy a pedir al usuario una receta
-;el programa va a decir los ingredientes principales y si tiene alguna propiedad (vegana, vegetariana, sin lactosa, para celiacos, picante o de dieta)
-
-;regla para pedir el nombre de la receta al usuario
-(defrule pedir-nombre-receta
-   (declare (salience -16))
+;; fin de módulo
+(defrule fin-deducir-propiedades
+   (declare (salience -5000)) 
+   ?f <- (modulo deducir-propiedades)
    =>
-   (printout t "Introduce el nombre de la receta: ")
-   (bind ?nombre (readline))
-   (assert (receta-pedida ?nombre))  ;almacenamos el nombre de la receta solicitada
-   (assert (Tarea receta-no-encontrada)) ;asignamos una tarea para ver si la receta existe
+   (retract ?f)
+   (assert (modulo obtener-compatibles))
 )
 
-;regla para ver si la receta existe
-(defrule ver-existencia-receta
-   (declare (salience -17))
-   (receta (nombre ?nombre))
-   (receta-pedida ?nombre)
-   ?f <- (Tarea receta-no-encontrada)
-   =>
-   (printout t "Receta " ?nombre " encontrada." crlf)
-   (retract ?f) ;eliminamos la tarea si la receta es encontrada
-)
-
-;regla para manejar cuando la receta no exista
-(defrule receta-no-encontrada
-   (declare (salience -18))
-   (Tarea receta-no-encontrada)
-   (receta-pedida ?nombre)
-   =>
-   (printout t "La receta " ?nombre " no se encuentra en el fichero recetas.txt." crlf)
-)
-
-
-;mostramos los ingredientes principales de la receta pedida
-(deffunction mostrar-ingredientes-principales (?receta ?lista-ingredientes)
-   (printout t "Ingredientes principales de la receta:" crlf)
-   (foreach ?ing ?lista-ingredientes
-      (if (any-factp ((?f propiedad_receta))
-            (and (eq ?f:tipo ingrediente_principal)
-                 (eq ?f:receta ?receta)
-                 (eq ?f:ingrediente ?ing)))
-         then
-            (printout t " - " ?ing crlf))))
-
-;mostramos las propiedades especiales de la receta
-(deffunction mostrar-propiedades-extra (?receta)
-   (bind ?prop-list (create$))
-   (foreach ?tipo (create$ es_vegana es_vegetariana es_sin_gluten es_picante es_sin_lactosa es_de_dieta)
-      (if (any-factp ((?f propiedad_receta))
-            (and (eq ?f:tipo ?tipo)
-                 (eq ?f:receta ?receta)))
-         then
-            (bind ?prop-list (insert$ ?prop-list 1 ?tipo))))
-   (if (neq (length$ ?prop-list) 0)
-      then
-         (printout t "Propiedades especiales: " (implode$ ?prop-list ) crlf)
-      else
-         (printout t "Sin propiedades especiales." crlf)))
-
-
- (defrule mostrar-ingredientes-y-propiedades
-   (declare (salience -19))
-   (receta-pedida ?nombre)
-   ?r <- (receta (nombre ?nombre) (ingredientes $?ings) (tipo_plato $?tipo))
-   =>
-   (printout t "Tipo de plato: " ?tipo crlf)
-   (mostrar-propiedades-extra ?nombre) ;mostramos las propiedades adicionales
-   (mostrar-ingredientes-principales ?nombre ?ings) ;mostramos los ingredientes relevantes
-)
-
- 

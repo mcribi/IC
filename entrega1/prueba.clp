@@ -1,3 +1,25 @@
+(defrule preguntar-tipo-plato
+   (not (preferencia tipo_plato ?))
+   =>
+   (printout t "Hola! Un placer poder ser tu recomendador de platos según tus necesidades. ¿Qué tipo de plato buscas? (entrante, primer_plato, plato_principal, postre, desayuno_merienda, acompanamiento): ")
+   (bind ?tipo (readline))
+   (assert (preferencia tipo_plato ?tipo))
+)
+
+(defrule preguntar-propiedades-especiales
+   (not (preferencia propiedad ?))
+   (not (hecho propiedad-preguntada)) ; solo preguntamos si no se ha preguntado aún
+   =>
+   (assert (hecho propiedad-preguntada))
+   (printout t "¿Buscas alguna propiedad especial? (es_vegana, es_vegetariana, es_sin_gluten, es_picante, es_sin_lactosa, es_de_dieta) o escribe 'ninguna': ")
+   (bind ?prop (readline))
+   (if (neq ?prop "ninguna") then
+      (assert (preferencia propiedad ?prop)))
+)
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;; AÑADIR LA INFORMACION DE AL MENOS 2 RECETAS NUEVAS al archivo compartido recetas.txt (https://docs.google.com/document/d/15zLHIeCEUplwsxUxQU66LsyKPY9n9p5v1bmi8M85YlU/edit?usp=sharing)
 ;;;;;recoger los datos de https://www.recetasgratis.net  en el siguiente formato
 (deftemplate receta
@@ -691,76 +713,69 @@
 ;       (propiedad_receta es_de_dieta ?r)
 
 
-;ahora voy a hacer una interaccion con el usuario para que sea mas comodo de entender mi programa:
-;le voy a pedir al usuario una receta
-;el programa va a decir los ingredientes principales y si tiene alguna propiedad (vegana, vegetariana, sin lactosa, para celiacos, picante o de dieta)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-;regla para pedir el nombre de la receta al usuario
-(defrule pedir-nombre-receta
-   (declare (salience -16))
-   =>
-   (printout t "Introduce el nombre de la receta: ")
-   (bind ?nombre (readline))
-   (assert (receta-pedida ?nombre))  ;almacenamos el nombre de la receta solicitada
-   (assert (Tarea receta-no-encontrada)) ;asignamos una tarea para ver si la receta existe
+(deftemplate receta-candidata
+  (slot nombre)
 )
 
-;regla para ver si la receta existe
-(defrule ver-existencia-receta
-   (declare (salience -17))
-   (receta (nombre ?nombre))
-   (receta-pedida ?nombre)
-   ?f <- (Tarea receta-no-encontrada)
+;; Recetas que coinciden con el tipo de plato indicado
+(defrule receta-compatible-con-preferencia
+   (receta (nombre ?n) (tipo_plato $?t))
+   (preferencia tipo_plato ?tp)
+   (test (member$ ?tp ?t))
    =>
-   (printout t "Receta " ?nombre " encontrada." crlf)
-   (retract ?f) ;eliminamos la tarea si la receta es encontrada
+   (assert (receta-candidata (nombre ?n)))
+)
+;; Si el usuario ha indicado una propiedad, descartamos recetas que no la tengan
+(defrule receta-incompatible-con-propiedad
+   ?f <- (receta-candidata (nombre ?n))
+   (preferencia propiedad ?p)
+   (not (propiedad_receta (receta ?n) (tipo ?p)))
+   =>
+   (retract ?f)
 )
 
-;regla para manejar cuando la receta no exista
-(defrule receta-no-encontrada
-   (declare (salience -18))
-   (Tarea receta-no-encontrada)
-   (receta-pedida ?nombre)
+;; Mensaje si no se indicó ninguna propiedad
+(defrule sin-propiedades-especiales
+   (not (preferencia propiedad ?))
    =>
-   (printout t "La receta " ?nombre " no se encuentra en el fichero recetas.txt." crlf)
+   (printout t "No se especificó ninguna propiedad especial. Se aceptan todas las recetas del tipo indicado." crlf)
+)
+
+;; Mensaje si no hay recetas candidatas
+(defrule sin-recetas-candidatas
+   (not (receta-candidata (nombre ?n)))
+   =>
+   (printout t "No se encontraron recetas que cumplan con tus preferencias." crlf)
 )
 
 
-;mostramos los ingredientes principales de la receta pedida
-(deffunction mostrar-ingredientes-principales (?receta ?lista-ingredientes)
-   (printout t "Ingredientes principales de la receta:" crlf)
-   (foreach ?ing ?lista-ingredientes
-      (if (any-factp ((?f propiedad_receta))
-            (and (eq ?f:tipo ingrediente_principal)
-                 (eq ?f:receta ?receta)
-                 (eq ?f:ingrediente ?ing)))
-         then
-            (printout t " - " ?ing crlf))))
-
-;mostramos las propiedades especiales de la receta
-(deffunction mostrar-propiedades-extra (?receta)
-   (bind ?prop-list (create$))
-   (foreach ?tipo (create$ es_vegana es_vegetariana es_sin_gluten es_picante es_sin_lactosa es_de_dieta)
-      (if (any-factp ((?f propiedad_receta))
-            (and (eq ?f:tipo ?tipo)
-                 (eq ?f:receta ?receta)))
-         then
-            (bind ?prop-list (insert$ ?prop-list 1 ?tipo))))
-   (if (neq (length$ ?prop-list) 0)
-      then
-         (printout t "Propiedades especiales: " (implode$ ?prop-list ) crlf)
-      else
-         (printout t "Sin propiedades especiales." crlf)))
-
-
- (defrule mostrar-ingredientes-y-propiedades
-   (declare (salience -19))
-   (receta-pedida ?nombre)
-   ?r <- (receta (nombre ?nombre) (ingredientes $?ings) (tipo_plato $?tipo))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Seleccionamos la primera receta candidata como la elegida
+(defrule seleccionar-receta
+   ?c <- (receta-candidata (nombre ?n))
    =>
+   (assert (receta-seleccionada (nombre ?n)))
+   (retract ?c)
+)
+
+;; Mostramos la receta seleccionada con justificación
+(defrule mostrar-receta-seleccionada
+   (receta-seleccionada (nombre ?n))
+   (receta (nombre ?n) (tipo_plato $?tipo) (ingredientes $?ings))
+   =>
+   (printout t crlf "Te recomendamos la receta: *** " ?n " ***" crlf)
    (printout t "Tipo de plato: " ?tipo crlf)
-   (mostrar-propiedades-extra ?nombre) ;mostramos las propiedades adicionales
-   (mostrar-ingredientes-principales ?nombre ?ings) ;mostramos los ingredientes relevantes
+   (printout t "Ingredientes: " (implode$ ?ings) crlf)
+   (printout t "Propiedades especiales:" crlf)
+   (do-for-all-facts ((?p propiedad_receta)) 
+      (and (eq ?p:receta ?n)
+           (neq ?p:tipo ingrediente_principal))
+      (printout t " - " ?p:tipo crlf))
+   (printout t crlf)
 )
 
- 
+

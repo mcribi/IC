@@ -197,6 +197,7 @@
 )
 
 
+
 (receta
     (nombre "Pechuga de pollo braseada en su jugo")
     (introducido_por "Luis Miguel Lopez Lopez")
@@ -732,7 +733,7 @@
    (dificultad muy_baja)
    (duracion 10m)
    (enlace https://www.recetasgratis.net/receta-de-jugo-de-pina-y-papaya-77229.html)
-   (tipo_plato acompanamiento)
+   (tipo_plato)
    (Calorias 283)
    (Proteinas 5)
    (Grasa 1)
