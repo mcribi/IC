@@ -1,34 +1,34 @@
 ;;MODULO PARA PEDIR INFORMACION AL USUARIO
-;(defmodule PEDIR
-;  (import MAIN ?ALL)
-;  (export ?ALL))
+(defmodule PEDIR (export ?ALL) (import MAIN ?ALL))
 
 (defrule iniciar-peticion
    =>
-   (assert (modulo PEDIR))
-)
+   (assert (modulo PEDIR)))
 
 (defrule preguntar-tipo-plato
    (modulo PEDIR)
-   (not (preferencia tipo_plato ?))
+   ?f <- (info-faltante (campo tipo-plato))
+   (not (preferencia-plato (tipo ?)))
    =>
-   (printout t "Hola! Un placer poder ser tu recomendador de platos según tus necesidades. ¿Qué tipo de plato buscas? (entrante, primer_plato, plato_principal, postre, desayuno_merienda, acompanamiento): ")
+   (printout t "¿Qué tipo de plato buscas? (entrante, primer_plato, plato_principal, postre, desayuno_merienda, acompanamiento): ")
    (bind ?tipo (readline))
-   (assert (preferencia tipo_plato ?tipo))
+   (assert (preferencia-plato (tipo ?tipo)))
+   (retract ?f)
 )
 
 (defrule preguntar-propiedades-especiales
    (modulo PEDIR)
-   (not (preferencia propiedad ?))
-   (not (hecho propiedad-preguntada)) ; solo preguntamos si no se ha preguntado aún
+   ?f <- (info-faltante (campo propiedad))
+   (not (preferencia-propiedad (tipo ?)))
+   (not (hecho propiedad-preguntada))
    =>
    (assert (hecho propiedad-preguntada))
    (printout t "¿Buscas alguna propiedad especial? (es_vegana, es_vegetariana, es_sin_gluten, es_picante, es_sin_lactosa, es_de_dieta) o escribe 'ninguna': ")
    (bind ?prop (readline))
    (if (neq ?prop "ninguna") then
-      (assert (preferencia propiedad ?prop)))
+      (assert (preferencia-propiedad (tipo ?prop))))
+   (retract ?f)
 )
-
 
 (defrule fin-pedir-informacion
    ?f <- (modulo PEDIR)
@@ -38,5 +38,7 @@
    (retract ?f)
    (assert (modulo deducir-propiedades))
 )
+
+
 
 

@@ -1,8 +1,6 @@
-;(defmodule PROPONER
-;  (import MAIN ?ALL))
+(defmodule proponer-receta (export ?ALL) (import MAIN ?ALL))
 
 (defrule iniciar-propuesta
-   (declare (salience -5002)) 
    =>
    (assert (modulo proponer-receta))
 )
