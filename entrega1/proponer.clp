@@ -6,16 +6,28 @@
 )
 
 
-;; Seleccionamos la primera receta candidata como la elegida
+;;seleccionamos una receta al azar de todas las candidatas disponibles que cumplan con las restricciones puestas por el usuario
 (defrule seleccionar-receta
    (modulo proponer-receta)
-   ?c <- (receta-candidata (nombre ?n))
    =>
-   (assert (receta-seleccionada (nombre ?n)))
-   (retract ?c)
+   (bind ?candidatas (create$))
+   ;; recolectamos todas las candidatas
+   (do-for-all-facts ((?r receta-candidata)) TRUE
+      (bind ?candidatas (create$ ?candidatas ?r:nombre)))
+
+   ;elegimos una al azar
+   (bind ?total (length$ ?candidatas))
+   (bind ?indice (random 1 ?total))
+   (bind ?seleccionada (nth$ ?indice ?candidatas))
+
+   (assert (receta-seleccionada (nombre ?seleccionada)))
+   ;eliminamos todas las demas candidatas
+   (do-for-all-facts ((?r receta-candidata)) TRUE
+      (retract ?r))
 )
 
-;; Mostramos la receta seleccionada con justificación
+
+;;mostramos la receta seleccionada con justificación
 (defrule mostrar-receta-seleccionada
    (modulo proponer-receta)
    (receta-seleccionada (nombre ?n))

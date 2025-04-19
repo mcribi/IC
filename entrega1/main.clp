@@ -330,6 +330,8 @@
 )
 
 ;; CONTROL DE FLUJO ENTRE MÓDULOS
+
+;ejecuccion del modulo pedir informacion al usuario
 (defrule control-pedir-informacion
    (estado activo)
    (info-faltante (campo tipo-plato))
@@ -338,6 +340,7 @@
    (focus PEDIR)
 )
 
+;ejecuccion del modulo deducir propiedades
 (defrule control-deduccion
    (estado activo)
    (not (info-faltante (campo tipo-plato)))
@@ -346,6 +349,7 @@
    (focus deducir-propiedades)
 )
 
+;ejecuccion del modulo obtener compatibles
 (defrule control-compatibles
    (estado activo)
    (not (modulo deducir-propiedades))
@@ -353,9 +357,11 @@
    (focus obtener-compatibles)
 )
 
+;ejecuccion del modulo proponer receta
 (defrule control-propuesta
    (estado activo)
-   (receta-candidata (nombre ?n))
+   (receta-candidata (nombre $?))
+   (not (receta-seleccionada (nombre ?))) ;aún no se ha seleccionado ninguna (para no proponer todas las disponibles)
    =>
    (focus proponer-receta)
 )

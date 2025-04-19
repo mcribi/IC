@@ -46,9 +46,9 @@
 
 
 ;; fin de módulo
-(defrule fin-obtener-compatibles
-   ?f <- (modulo obtener-compatibles)
-   =>
-   (retract ?f)
-   (assert (modulo proponer-receta))
-)
+;(defrule fin-obtener-compatibles
+;   ?f <- (modulo obtener-compatibles)
+;   =>
+;   (retract ?f)
+;   (assert (modulo proponer-receta))
+;)
