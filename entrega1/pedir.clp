@@ -50,16 +50,31 @@
    (retract ?f)
 )
 
-
-
+;regla final del modulo donde imprime las preferencias guardadas para
+;que el usuario pueda comprobar la informacion guardada
 (defrule fin-pedir-informacion
    ?f <- (modulo PEDIR)
-   (preferencia tipo_plato ?)
-   (hecho propiedad-preguntada)
+   (not (info-faltante (campo tipo-plato)))
+   (not (info-faltante (campo propiedad)))
    =>
+   (printout t crlf "Resumen de tus preferencias:" crlf)
+
+   ;;mostramos los tipos de plato elegidos
+   (printout t "  Tipo(s) de plato: ")
+   (do-for-all-facts ((?p preferencia-plato)) TRUE
+      (printout t ?p:tipo " "))
+   (printout t crlf)
+
+   ;;mostramos la propiedad especial (si la hay)
+   (bind ?propiedad "ninguna")
+   (do-for-fact ((?pp preferencia-propiedad)) TRUE
+      (bind ?propiedad ?pp:tipo))
+   (printout t "  Propiedad especial: " ?propiedad crlf crlf)
+
    (retract ?f)
    (assert (modulo deducir-propiedades))
 )
+
 
 
 
