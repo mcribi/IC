@@ -56,6 +56,13 @@
 (deftemplate desea-info
   (slot valor))
 
+(deftemplate motivo-rechazo
+   (slot tipo)) ; ingredientes / dificultad / duracion
+
+(deftemplate detalle-rechazo
+   (slot tipo) ; dificultad / duracion / ingrediente
+   (slot valor); el valor concreto a evitar
+)
 
 ;;conocimiento: 
 ;;;;;;;;;;Cargo conocimiento anterior y mismo

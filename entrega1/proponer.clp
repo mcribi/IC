@@ -9,13 +9,13 @@
 ;;seleccionamos una receta al azar de todas las candidatas disponibles que cumplan con las restricciones puestas por el usuario
 (defrule seleccionar-receta
    (modulo proponer-receta)
+   (not (receta-seleccionada (nombre ?)))
    =>
    (bind ?candidatas (create$))
-   ;; recolectamos todas las candidatas
+   ;recolectamos todas las candidatas
    (do-for-all-facts ((?r receta-candidata)) TRUE
       (bind ?candidatas (create$ ?candidatas ?r:nombre)))
 
-   ;elegimos una al azar
    (bind ?total (length$ ?candidatas))
    (bind ?indice (random 1 ?total))
    (bind ?seleccionada (nth$ ?indice ?candidatas))
@@ -90,14 +90,25 @@
    (printout t "Valores nutricionales - Cal: " ?cal ", Prot: " ?prot ", Grasa: " ?gras ", Carb: " ?carb ", Fibra: " ?fibra ", Colesterol: " ?colest crlf)
    (printout t "Enlace: " ?link crlf crlf)
    (retract ?d)
+   (assert (info-mostrada))
 )
 
 ;preguntamos al usuario si le ha gustado la receta que le hemos recomendado
 (defrule preguntar-confirmacion
    (modulo proponer-receta)
    (receta-seleccionada (nombre ?n))
-   (not (desea-info (valor ?))) ; espera a que se haya respondido esa pregunta
+   ?d <- (desea-info (valor no))  ; si no quiso más info
    =>
+   (retract ?d)
+   (assert (info-mostrada)) ; también continúa
+)
+
+(defrule pedir-confirmacion-receta
+   (modulo proponer-receta)
+   (receta-seleccionada (nombre ?n))
+   ?i <- (info-mostrada)
+   =>
+   (retract ?i)
    (printout t "¿Te gusta esta receta? (si / no): ")
    (bind ?respuesta (lowcase (readline)))
    (if (eq ?respuesta "si") then
@@ -131,6 +142,125 @@
    (retract ?m)
 )
 
+;si no le ha gustado le preguntamos el por que (ingredientes, dificultad, duracion)
+(defrule preguntar-rechazo
+   (modulo proponer-receta)
+   ?c <- (confirmacion_receta (valor no))
+   =>
+   (retract ?c)
+   (printout t "¿Qué aspecto no te convence de la receta? (ingredientes, dificultad, duracion): ")
+   (bind ?entrada (readline))
+   (bind ?motivo (sym-cat (lowcase ?entrada))) ; convertir a símbolo
+   (if (member$ ?motivo (create$ ingredientes dificultad duracion)) then
+      (assert (motivo-rechazo (tipo ?motivo)))
+   else
+      (printout t "Opción no válida. Intenta de nuevo." crlf)
+      (assert (confirmacion_receta (valor no)))) ; volverá a preguntar
+)
+
+
+;si el motivo es dificultad, preguntar el nivel
+(defrule detalle-rechazo-dificultad
+   ?m <- (motivo-rechazo (tipo dificultad))
+   =>
+   (retract ?m)
+   (printout t "¿Qué dificultad quieres evitar? (alta, media, baja, muy_baja): ")
+   (bind ?entrada (readline))
+   (bind ?dif (sym-cat (lowcase ?entrada)))
+   (if (member$ ?dif (create$ alta media baja muy_baja)) then
+      (assert (detalle-rechazo (tipo dificultad) (valor ?dif)))
+   else
+      (printout t "Dificultad no válida. Intenta de nuevo." crlf)
+      (assert (motivo-rechazo (tipo dificultad)))) ; vuelve a preguntar
+)
+
+
+;si el motivo es duración, preguntar máximo en minutos
+(defrule detalle-rechazo-duracion
+   ?m <- (motivo-rechazo (tipo duracion))
+   =>
+   (retract ?m)
+   (printout t "¿Cuál es el tiempo máximo de preparación en minutos (solo número, ejemplo: 45)?: ")
+   (bind ?entrada (readline))
+   (if (and (integerp (eval ?entrada)) (> (eval ?entrada) 0)) then
+      (assert (detalle-rechazo (tipo duracion) (valor (eval ?entrada))))
+   else
+      (printout t "Duración no válida. Intenta de nuevo." crlf)
+      (assert (motivo-rechazo (tipo duracion))))
+)
+
+;si el motivo es ingredientes, preguntar cuál
+(defrule detalle-rechazo-ingrediente
+   ?m <- (motivo-rechazo (tipo ingredientes))
+   =>
+   (retract ?m)
+   (printout t "¿Qué ingrediente deseas evitar?: ")
+   (bind ?ing (lowcase (readline)))
+   (assert (detalle-rechazo (tipo ingredientes) (valor ?ing)))
+)
+
+
+; Filtrar por dificultad
+(defrule filtrar-dificultad
+   ?f <- (detalle-rechazo (tipo dificultad) (valor ?d))
+   ?r <- (receta-candidata (nombre ?n))
+   (receta (nombre ?n) (dificultad ?dif&?d))
+   =>
+   (retract ?r)
+)
+
+
+; Filtrar por duración (cuando excede el tiempo máximo en minutos indicado por el usuario)
+(defrule filtrar-duracion
+   ?f <- (detalle-rechazo (tipo duracion) (valor ?max))
+   ?r <- (receta-candidata (nombre ?n))
+   (receta (nombre ?n) (duracion ?dur))
+   =>
+   (bind ?solo-num (sub-string 1 (- (str-length ?dur) 1) ?dur))
+   (if (integerp (eval ?solo-num)) then
+      (bind ?num (eval ?solo-num))
+      (if (> ?num ?max) then
+         (retract ?r)))
+)
+
+; Filtrar por ingrediente
+(defrule filtrar-ingrediente
+   ?f <- (detalle-rechazo (tipo ingredientes) (valor ?ing))
+   ?r <- (receta-candidata (nombre ?n))
+   (receta (nombre ?n) (ingredientes $?lista))
+   =>
+   (if (member$ ?ing ?lista) then
+      (retract ?r))
+)
+
+;regla para marcar que ya se ha filtrado todas las recetas candidatas
+(defrule marcar-filtrado-completo
+   (modulo proponer-receta)
+   (detalle-rechazo (tipo dificultad) (valor ?d))
+   (not 
+      (and 
+         (receta-candidata (nombre ?n))
+         (receta (nombre ?n) (dificultad ?d))
+      )
+   )
+   ?f <- (detalle-rechazo (tipo dificultad) (valor ?d))
+   =>
+   (printout t "Buscamos recetas para evitar" crlf) ;ACABAR
+   (retract ?f)
+   (assert (filtrado-completado))
+)
+
+;regla que repropone otra receta despues del filtrado
+(defrule continuar-tras-filtrado
+   (modulo proponer-receta)
+   ?f <- (filtrado-completado)
+   ?r <- (receta-seleccionada (nombre ?n))
+   =>
+   (retract ?f)
+   (retract ?r) ; limpiamos la receta anterior
+   ; La regla seleccionar-receta se disparará automáticamente
+)
+
 
 ;; si no le ha gustado, proponemos otra que no sea la anterior
 (defrule nueva-propuesta
@@ -148,6 +278,7 @@
 
 ;regla para cuando solo quede/haya una receta candidata
 (defrule sin-mas-recetas
+   (declare (salience 10)) ;si esta lista para disparse que se dispare la primera para no causar errores inesperados
    ?m <- (modulo proponer-receta)
    ?r <- (receta-seleccionada (nombre ?n))
    ?c <- (confirmacion_receta (valor no))
@@ -161,6 +292,21 @@
    (retract ?c)
    (retract ?m)
 )
+
+;regla para cuando no haya despues del filtrado
+(defrule sin-mas-recetas-despues-filtrado
+   (declare (salience 10)) ;si esta lista para disparse que se dispare la primera para no causar errores inesperados
+   ?m <- (modulo proponer-receta)
+   ?r <- (receta-seleccionada (nombre ?n))
+   ?f <- (filtrado-completado)
+   (not (receta-candidata (nombre ?otra&~?n)))
+   =>
+   (printout t crlf "No tenemos más recetas compatibles tras aplicar tus preferencias." crlf)
+   (retract ?f)
+   (retract ?r)
+   (retract ?m)
+)
+
 
 
 
