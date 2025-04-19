@@ -33,7 +33,6 @@
    (slot nombre)
 )
 
-
 (deftemplate receta-candidata
   (slot nombre)
 )
@@ -50,6 +49,10 @@
 
 (deftemplate recomendacion
    (slot receta))
+
+(deftemplate confirmacion_receta
+   (slot valor))
+
 
 
 ;;conocimiento: 
