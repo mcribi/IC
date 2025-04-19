@@ -181,9 +181,9 @@
    =>
    (retract ?m)
    (printout t "¿Cuál es el tiempo máximo de preparación en minutos (solo número, ejemplo: 45)?: ")
-   (bind ?entrada (readline))
-   (if (and (integerp (eval ?entrada)) (> (eval ?entrada) 0)) then
-      (assert (detalle-rechazo (tipo duracion) (valor (eval ?entrada))))
+   (bind ?entrada (read))
+   (if (and (integerp ?entrada) (> ?entrada 0)) then
+      (assert (detalle-rechazo (tipo duracion) (valor ?entrada)))
    else
       (printout t "Duración no válida. Intenta de nuevo." crlf)
       (assert (motivo-rechazo (tipo duracion))))
@@ -195,12 +195,13 @@
    =>
    (retract ?m)
    (printout t "¿Qué ingrediente deseas evitar?: ")
-   (bind ?ing (lowcase (readline)))
+   (bind ?entrada (readline))
+   (bind ?ing (sym-cat (lowcase ?entrada))) ; convierte a símbolo
    (assert (detalle-rechazo (tipo ingredientes) (valor ?ing)))
 )
 
 
-; Filtrar por dificultad
+;filtramos por dificultad
 (defrule filtrar-dificultad
    ?f <- (detalle-rechazo (tipo dificultad) (valor ?d))
    ?r <- (receta-candidata (nombre ?n))
@@ -210,28 +211,28 @@
 )
 
 
-; Filtrar por duración (cuando excede el tiempo máximo en minutos indicado por el usuario)
+;filtramos por duración (cuando excede el tiempo máximo en minutos indicado por el usuario)
 (defrule filtrar-duracion
    ?f <- (detalle-rechazo (tipo duracion) (valor ?max))
    ?r <- (receta-candidata (nombre ?n))
    (receta (nombre ?n) (duracion ?dur))
    =>
-   (bind ?solo-num (sub-string 1 (- (str-length ?dur) 1) ?dur))
-   (if (integerp (eval ?solo-num)) then
-      (bind ?num (eval ?solo-num))
-      (if (> ?num ?max) then
-         (retract ?r)))
+   (bind ?solo-num (sub-string 1 (- (str-length ?dur) 1) ?dur)) ; quita la "m"
+   (bind ?num (eval ?solo-num))
+   (if (> ?num ?max) then
+      (retract ?r))
 )
 
-; Filtrar por ingrediente
+
+;filtramos por ingrediente
 (defrule filtrar-ingrediente
    ?f <- (detalle-rechazo (tipo ingredientes) (valor ?ing))
    ?r <- (receta-candidata (nombre ?n))
-   (receta (nombre ?n) (ingredientes $?lista))
+   (receta (nombre ?n) (ingredientes $?lista&:(member$ ?ing ?lista)))
    =>
-   (if (member$ ?ing ?lista) then
-      (retract ?r))
+   (retract ?r)
 )
+
 
 ;regla para marcar que ya se ha filtrado todas las recetas candidatas
 (defrule marcar-filtrado-completo
@@ -249,6 +250,47 @@
    (retract ?f)
    (assert (filtrado-completado))
 )
+
+;regla para marcar que el filtrado de ingredientes ha acabado
+(defrule marcar-filtrado-completo-ingredientes
+   (modulo proponer-receta)
+   (detalle-rechazo (tipo ingredientes) (valor ?ing))
+   (not 
+      (and 
+         (receta-candidata (nombre ?n))
+         (receta (nombre ?n) (ingredientes $?ings&:(member$ ?ing ?ings)))
+      )
+   )
+   ?f <- (detalle-rechazo (tipo ingredientes) (valor ?ing))
+   =>
+   (printout t "Filtrado por ingrediente completado. Evitando: " ?ing crlf)
+   (retract ?f)
+   (assert (filtrado-completado))
+)
+
+;regla para marcar el filtrado de duracion completado
+(defrule marcar-filtrado-completo-duracion
+   (modulo proponer-receta)
+   ?f <- (detalle-rechazo (tipo duracion) (valor ?max))
+   =>
+   (do-for-all-facts ((?rc receta-candidata)) TRUE
+      (do-for-fact ((?r receta)) 
+         (eq ?r:nombre ?rc:nombre)
+         (bind ?dur-str (sub-string 1 (- (str-length ?r:duracion) 1) ?r:duracion))
+         (bind ?dur (eval ?dur-str))
+         (if (> ?dur ?max) then
+            (return) ; hay al menos una que aún no se ha filtrado, no hacemos nada
+         )
+      )
+   )
+   ;; si llegamos hasta aquí, todas han sido filtradas
+   (printout t "Filtrado por duración completado. Máximo permitido: " ?max " minutos." crlf)
+   (retract ?f)
+   (assert (filtrado-completado))
+)
+
+
+
 
 ;regla que repropone otra receta despues del filtrado
 (defrule continuar-tras-filtrado
