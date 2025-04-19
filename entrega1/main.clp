@@ -53,6 +53,8 @@
 (deftemplate confirmacion_receta
    (slot valor))
 
+(deftemplate desea-info
+  (slot valor))
 
 
 ;;conocimiento: 

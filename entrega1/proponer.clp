@@ -41,10 +41,62 @@
    (printout t crlf)
 )
 
+;preguntamos si quiere más información sobre la receta
+(defrule preguntar-si-desea-info
+   (modulo proponer-receta)
+   (receta-seleccionada (nombre ?n))
+   =>
+   (printout t "¿Quieres más información sobre esta receta? (si / no): ")
+   (bind ?respuesta (lowcase (readline)))
+   (if (eq ?respuesta "si") then
+      (assert (desea-info (valor si)))
+   else
+      (assert (desea-info (valor no))))
+)
+
+;si quiere más información, se la mostramos
+(defrule mostrar-informacion-detallada
+   (modulo proponer-receta)
+   (receta-seleccionada (nombre ?n))
+   ?d <- (desea-info (valor si))
+   ?r <- (receta 
+           (nombre ?n)
+           (introducido_por ?autor)
+           (numero_personas ?npers)
+           (ingredientes $?ings)
+           (dificultad ?dific)
+           (duracion ?dur)
+           (enlace ?link)
+           (tipo_plato $?tipos)
+           (coste ?coste)
+           (tipo_copcion ?coc)
+           (tipo_cocina $?cocina)
+           (temporada ?temp)
+           (Calorias ?cal)
+           (Proteinas ?prot)
+           (Grasa ?gras)
+           (Carbohidratos ?carb)
+           (Fibra ?fibra)
+           (Colesterol ?colest))
+   =>
+   (printout t crlf "*** Información detallada de la receta: ***" crlf)
+   (printout t "Autor: " ?autor crlf)
+   (printout t "Para " ?npers " personas" crlf)
+   (printout t "Dificultad: " ?dific ", Duración: " ?dur crlf)
+   (printout t "Tipo(s) de plato: " (implode$ ?tipos) crlf)
+   (printout t "Ingredientes: " (implode$ ?ings) crlf)
+   (printout t "Tipo de cocción: " ?coc ", Tipo cocina: " (implode$ ?cocina) crlf)
+   (printout t "Temporada: " ?temp ", Coste: " ?coste crlf)
+   (printout t "Valores nutricionales - Cal: " ?cal ", Prot: " ?prot ", Grasa: " ?gras ", Carb: " ?carb ", Fibra: " ?fibra ", Colesterol: " ?colest crlf)
+   (printout t "Enlace: " ?link crlf crlf)
+   (retract ?d)
+)
+
 ;preguntamos al usuario si le ha gustado la receta que le hemos recomendado
 (defrule preguntar-confirmacion
    (modulo proponer-receta)
    (receta-seleccionada (nombre ?n))
+   (not (desea-info (valor ?))) ; espera a que se haya respondido esa pregunta
    =>
    (printout t "¿Te gusta esta receta? (si / no): ")
    (bind ?respuesta (lowcase (readline)))
