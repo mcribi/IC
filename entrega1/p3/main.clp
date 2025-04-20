@@ -1,6 +1,29 @@
+;Este archivo es el ejecutable donde carga todos los modulos y definimos las cosas en comun de todo el proyecto
+;He diseniado un sistema basado en el conocimiento (Qué cocino hoy) para aconsejar a un usuario una receta de acuerdo a algunas restricciones
+;El sistema cargará las recetas del fichero recetas.txt (igual que en la practica 2)
+;Lo hemos hecho modular, es decir, tenemos 4 modulo mas el main
+;En cada modulo nos centramos en una cosa diferente para que sea legible y editable facilmente. Es facil de entender y de aniadir o eliminar funcionalidades simplemente modificando reglas (eliminando/aniadendo)
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;MAIN.CLP 
+;Cargamos todos los modulos:
+; 1. pedir-informacion: pide la informacion necesaria al usuario y guarda esa informacion (admite respouestas parciales para que sea mas flexible para el usuario)
+; 2. deducir-propiedades: es la practica 2 donde a partir de conocimiento se deducen propiedades de las recetas y alimentos
+; 3. obtener-compatibles: con la informacion dada por el usuario, se van filtrando recetas hasta quedarnos con las candidatas concorde a esas restricciones
+; 4. proponer-receta: al tener ya todas las candidatas, se escoge una aleatoria entre las candidatas, se pregunta al usuario si quiere mas informacion y si le gusta la receta. 
+; si no le gusta la receta, se le preguntara por ciertas caracteristicas que quiere cambiar y se filtraran y retractaran las recetas que no cumplan esas caracteristicas
+; se volvera a enseniar la receta seleccionada aleatoriamente entre las candidatas y volvera a preguntar si le gusta y si no la caracteristica que qiere filtrar. 
+; asi en bucle hasta que no queden mas recetas a recomendar o hasta que el usuario le guste la receta
+; 5. MAIN: define los template generales, controla el flujo entre los modulos, incializa el sistema saludando al usuario y activa el primer modulo 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+;definimos el modulo main
 (defmodule MAIN (export ?ALL))
 
 ;defino todos los templates que necesitamos 
+;plantilla de receta (igual que practica 2)
 (deftemplate receta
 (slot nombre)   ; necesario
 (slot introducido_por) ; necesario
@@ -23,42 +46,52 @@
 (slot Colesterol) ; calculado necesario
 )
 
+;plantilla propiedad receta
 (deftemplate propiedad_receta
    (slot tipo)         ;tipo de propiedad especial que tenga la receta
    (slot receta)       ;nombre de la receta
    (slot ingrediente)  ;ingredientes principales
 )
 
+;plantilla receta a enseñar (seleccionada entre todas las candidatas)
 (deftemplate receta-seleccionada
    (slot nombre)
 )
 
+;plantilla para recetas compatibles con las restricciones dichas
 (deftemplate receta-candidata
   (slot nombre)
 )
 
+;plantilla para la informacion que falta que no ha dado todavia el usuario
 (deftemplate info-faltante 
   (slot campo))
 
-
+;plantilla para el tipo de plato que ha elegido el usuario
 (deftemplate preferencia-plato
    (slot tipo))
 
+;plantilla para la propiedad que tiene de restriccion que ha dicho el usuario
 (deftemplate preferencia-propiedad
    (slot tipo))
 
+;plantilla con la receta recomendada
 (deftemplate recomendacion
    (slot receta))
 
+;plantilla de si o no para almacenar si el usuario le gusta o no la receta
 (deftemplate confirmacion_receta
    (slot valor))
 
+;plantilla de si o no para almacenar si el usuario quiere una informacion mas detallada de la receta
 (deftemplate desea-info
   (slot valor))
 
+;plantilla para almacenar la caracteristica que no le gusta al usuario a cambiar
 (deftemplate motivo-rechazo
    (slot tipo)) ; ingredientes / dificultad / duracion
 
+;plantilla mas detallada sobre el motivo de rechazo, de la caracteristica que quiere cambiar
 (deftemplate detalle-rechazo
    (slot tipo) ; dificultad / duracion / ingrediente
    (slot valor); el valor concreto a evitar
@@ -170,7 +203,8 @@
 )
 
 ;;;;;;;;;;;MI CONOCIMIENTO: 
-;; aniado conocimiento para que pueda funcionar mejor
+;; aniado conocimiento para que pueda funcionar mejor (mas tipos y alimentos sobretodo)
+;;agrupados por grupos directamente
 (deffacts conocimiento_ampliado_ingredientes
 
   ;carnes
@@ -222,7 +256,7 @@
   (es_un_tipo_de marisco pescado)
   (es_un_tipo_de camarones pescado)
 
-  ;lácteos
+  ;lacteos
   (es_un_tipo_de leche lacteos)
   (es_un_tipo_de nata lacteos)
   (es_un_tipo_de queso lacteos)
@@ -244,7 +278,7 @@
   (es_un_tipo_de arandanos fruta)
   (es_un_tipo_de mango fruta)
 
-  ;verduras y hortalizas
+  ;verduras
   (es_un_tipo_de zanahoria verdura)
   (es_un_tipo_de cebolla verdura)
   (es_un_tipo_de ajo verdura)
@@ -324,6 +358,10 @@
 
 )
 
+;;Tenemos en un fichero de texto recetas.txt en el mismo directorio de recetas.clp y hemos copiado 
+;;parte (lo he corregido yo que tenia algunos fallos y no cargaba bien) el contenido del archivo compartido
+;;ademas, he aniadido yo dos recetas 
+;cargamos las recetas (lo primero, de ahi el salience tan positivo)
 (defrule cargar-modulos
     (declare (salience 1000))
     =>
@@ -333,29 +371,30 @@
     (load "proponer.clp")
 )
 
+;regla para introducir al usuario el recomendador de recetas
+;saluda y aniade un hecho de que falta informacion para que se dispare despues el pedir informacion al usuario
 (defrule iniciar-sistema
    =>
-   (printout t crlf "Hola! Un placer poder ser tu recomendador de platos según tus necesidades." crlf)
+   (printout t crlf "Hola. Soy un recomendador de platos según tus necesidades." crlf)
    (assert (estado activo))
    (assert (info-faltante (campo tipo-plato)))
    (assert (info-faltante (campo propiedad)))
 )
 
 ;; CONTROL DE FLUJO ENTRE MÓDULOS
-
 ;ejecuccion del modulo pedir informacion al usuario
 (defrule control-pedir-informacion
    (estado activo)
-   (info-faltante (campo tipo-plato))
+   (info-faltante (campo tipo-plato)) ;le falta informacion -> en este modulo la pide al usuario
    (info-faltante (campo propiedad))
    =>
-   (focus PEDIR)
+   (focus PEDIR) ;hacemos focus para que se centre en ese modulo
 )
 
 ;ejecuccion del modulo deducir propiedades
 (defrule control-deduccion
    (estado activo)
-   (not (info-faltante (campo tipo-plato)))
+   (not (info-faltante (campo tipo-plato))) ;ya no le falta informacion porque la ha pedido en el modulo anterior
    (not (info-faltante (campo propiedad)))
    =>
    (focus deducir-propiedades)
@@ -364,7 +403,7 @@
 ;ejecuccion del modulo obtener compatibles
 (defrule control-compatibles
    (estado activo)
-   (not (modulo deducir-propiedades))
+   (not (modulo deducir-propiedades)) ;ya se ha hecho el modulo anterior
    =>
    (focus obtener-compatibles)
 )

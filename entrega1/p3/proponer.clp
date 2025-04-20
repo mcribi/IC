@@ -1,10 +1,30 @@
+;;MODULO PARA PROPONER RECETA COMPATIBLE Y CAMBIAR CARACTERISTICAS ESPECIFICAS QUE NO LE GUSTAN AL USUARIO
+;importamos todo lo del main y definimos el modulo actual. Con el export all hace que lo definido en este modulo este disponible para los demas modulos
+;asi puede ser usado tambien desde fuera
 (defmodule proponer-receta (export ?ALL) (import MAIN ?ALL))
 
+;;;;;;;;;;;;;;;;;;;;EXPLICACON MODULO;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;PROPONER-RECETA: este modulo se encarga de seleccionar aleatoriamente una receta entre las candidatas
+;tenemos una lista de recetas candidatas que nos ha dado el modulo anterior 
+;seleccionamos una al azar de las candidatas (para que no siempre recomiende la misma receta), 
+;mostramos CON JUSTIFICACION (EL POR QUE SE ADECUA A LAS RESTRICCIONES DEL USUARIO) la receta y le pedimos al usuario si quiere saber mas de la receta (dificultad, duracion...)
+;puede decir que si y le enseniara toda la informacion que tenemos en nuestra base sobre la receta. Si dice cualquier otra cosa (no o cualquier caracter), entendera que no quiere mas informacion
+;y pasara directamente a preguntar si le ha gusta o no la receta. Aqui puede elegir si/no (o cualquier cosa que no sea si se interpretara como que no)
+;si no le gusta se le preguntara el motivo. Veo mas logico preguntar por: dificultad, duracion e ingredientes a evitar
+;dificultad: elegira entre (muy_baja, baja, media, alta) una a evitar, se filtrara y se propondra una nueva receta adecuada a esta restriccion y a las anteriores (es decir, se acumulan las restricciones)
+;duracion: si pone un numero, se filtraran las recetas que tienen mas de esa duracion. Es decir, el usuario pondra el numero maximo en minutos que quiere que dure una receta
+;ingredientes: es natural que no tengamos algun ingrediente en casa de la receta disponible. Por lo que el usuario podra filtrar y quitar las recetas que tienen ese ingrediente
+;se podria aniadir mas preguntas pero creo que esas son las mas importante y para que no se haga muy tediosa las respuestas
+; esto sigue EN BUCLE hasta que el usuario diga que si le gusta la receta recomendada o hasta que ya no queden recetas en la base de datos con las restriccion dichas (se le informara al usuario)
+; cuando se diga que si, el sistema dara la receta JUSTIFICANDO la eleccion y explicando que es cada propiedad y por qué se ha elegido esa receta
+;por tanto, sabe deducir que una receta es compatible con lo que desea el usuario y en este modulo retracta cuando con la nueva información deje de serlo
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;regla para aniadir el modulo actual para que se puedan disparar las siguiente reglas de este modulo
 (defrule iniciar-propuesta
    =>
    (assert (modulo proponer-receta))
 )
-
 
 ;;seleccionamos una receta al azar de todas las candidatas disponibles que cumplan con las restricciones puestas por el usuario
 (defrule seleccionar-receta
@@ -24,7 +44,7 @@
 )
 
 
-;;mostramos la receta seleccionada con justificación
+;;mostramos la receta seleccionada con justificación (ingredientes y propiedades)
 (defrule mostrar-receta-seleccionada
    (modulo proponer-receta)
    (receta-seleccionada (nombre ?n))
@@ -41,7 +61,9 @@
    (printout t crlf)
 )
 
-;preguntamos si quiere más información sobre la receta
+;preguntamos si quiere más información sobre la receta 
+; si dice que si se le enseniara toda la informacion que tenemos en la base de datos sobre la receta
+;independientemente de la respuesta (si o no) se preguntara a continuacion si le ha gustado la receta 
 (defrule preguntar-si-desea-info
    (modulo proponer-receta)
    (receta-seleccionada (nombre ?n))
@@ -54,7 +76,7 @@
       (assert (desea-info (valor no))))
 )
 
-;si quiere más información, se la mostramos
+;si quiere más información, se la mostramos (todo lo que tenemos almacenado en el template de receta)
 (defrule mostrar-informacion-detallada
    (modulo proponer-receta)
    (receta-seleccionada (nombre ?n))
@@ -103,6 +125,7 @@
    (assert (info-mostrada)) ; también continúa
 )
 
+;para pedir confirmacion de si le ha gustado la receta o no para filtrar y proponer otra
 (defrule pedir-confirmacion-receta
    (modulo proponer-receta)
    (receta-seleccionada (nombre ?n))
@@ -117,7 +140,7 @@
       (assert (confirmacion_receta (valor no))))
 )
 
-;si le ha gustado la receta, justificamos mejor la respouesta y terminamos
+;si le ha gustado la receta, justificamos mejor la respuesta (que es cada propiedad, ingredientes y restricciones) y terminamos
 ;justifico cada propiedad que es y por que se ha elegido esa receta (segun propiedad especial y tipo de plato)
 (defrule justificar-receta-final
    ?m <- (modulo proponer-receta)
@@ -159,7 +182,7 @@
 )
 
 
-;si el motivo es dificultad, preguntar el nivel
+;si el motivo es dificultad, preguntar el nivel a evitar
 (defrule detalle-rechazo-dificultad
    ?m <- (motivo-rechazo (tipo dificultad))
    =>
@@ -175,7 +198,9 @@
 )
 
 
-;si el motivo es duración, preguntar máximo en minutos
+;si el motivo es duración, preguntar máximo en minutos (le ponemos un ejemplo de respuesta)
+;en la base de datos tenemos almacenado como un numero + "m"
+;al usuario le pedimos solo el numero y despues ya modificamos nosotros para poder comparar
 (defrule detalle-rechazo-duracion
    ?m <- (motivo-rechazo (tipo duracion))
    =>
@@ -189,14 +214,14 @@
       (assert (motivo-rechazo (tipo duracion))))
 )
 
-;si el motivo es ingredientes, preguntar cuál
+;si el motivo es ingredientes, preguntar cual ingrediente quiere evitar
 (defrule detalle-rechazo-ingrediente
    ?m <- (motivo-rechazo (tipo ingredientes))
    =>
    (retract ?m)
    (printout t "¿Qué ingrediente deseas evitar?: ")
    (bind ?entrada (readline))
-   (bind ?ing (sym-cat (lowcase ?entrada))) ; convierte a símbolo
+   (bind ?ing (sym-cat (lowcase ?entrada))) ; convierte a simbolo
    (assert (detalle-rechazo (tipo ingredientes) (valor ?ing)))
 )
 
@@ -217,7 +242,7 @@
    ?r <- (receta-candidata (nombre ?n))
    (receta (nombre ?n) (duracion ?dur))
    =>
-   (bind ?solo-num (sub-string 1 (- (str-length ?dur) 1) ?dur)) ; quita la "m"
+   (bind ?solo-num (sub-string 1 (- (str-length ?dur) 1) ?dur)) ; quita la "m" para que concuerde
    (bind ?num (eval ?solo-num))
    (if (> ?num ?max) then
       (retract ?r))
@@ -246,7 +271,7 @@
    )
    ?f <- (detalle-rechazo (tipo dificultad) (valor ?d))
    =>
-   (printout t "Buscamos recetas para evitar" crlf) ;ACABAR
+   (printout t "Buscamos recetas para evitar" crlf) 
    (retract ?f)
    (assert (filtrado-completado))
 )
@@ -290,8 +315,6 @@
 )
 
 
-
-
 ;regla que repropone otra receta despues del filtrado
 (defrule continuar-tras-filtrado
    (modulo proponer-receta)
@@ -300,7 +323,7 @@
    =>
    (retract ?f)
    (retract ?r) ; limpiamos la receta anterior
-   ; La regla seleccionar-receta se disparará automáticamente
+   ;la regla seleccionar-receta se disparará automáticamente
 )
 
 

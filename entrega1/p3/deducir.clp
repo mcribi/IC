@@ -1,10 +1,20 @@
+;;MODULO PARA DEDUCIR PROPIEDADES A PARTIR DEL CONOCIMIENTO
+;importamos todo lo del main y definimos el modulo actual. Con el export all hace que lo definido en este modulo este disponible para los demas modulos
+;asi puede ser usado tambien desde fuera
+;;;;;;ES IGUAL QUE LA PRACTICA 2 (sin la interacion final del usuario->aqui se hace en el modulo correspondiente)
 (defmodule deducir-propiedades (export ?ALL) (import MAIN ?ALL))
 
+;regla para aniadir el modulo actual para que se puedan disparar las siguiente reglas de este modulo
 (defrule iniciar-deduccion
   (declare (salience 1001))
    =>
    (assert (modulo deducir-propiedades))
 )
+
+;;Tenemos en un fichero de texto recetas.txt en el mismo directorio de recetas.clp y hemos copiado 
+;;parte (lo he corregido yo que tenia algunos fallos y no cargaba bien) el contenido del archivo compartido
+;;ademas, he aniadido yo dos recetas 
+;cargamos las recetas (lo primero, de ahi el salience tan positivo)
 
 (defrule carga_recetas
 (declare (salience 1000))
@@ -12,8 +22,6 @@
 =>
 (load-facts "recetas.txt")
 )
-
-
 
 (defrule componiendo_es_un_tipo_de
 (modulo deducir-propiedades)
@@ -143,6 +151,7 @@
 )
 
 ;si hay 3 ingredientes o menos son todos principales
+;es posible que se cuele algun condimento o algo no esencial, pero despues se retractara
 (defrule pocos-ingredientes-principales
   (modulo deducir-propiedades)
   (receta (nombre ?nombre) (ingredientes $?lista))
@@ -156,6 +165,8 @@
 
 
 ; 2) Los condimentos no son ingredientes principales
+;vamos a ver de cada receta los ingredientes y si hay condimentos los quitamos
+;no considero que sal, perejil o pimienta sean ingredientes principales, porque eso suele estar en casi todas las recetas
 (defrule evitar-condimentos-como-principales
   (modulo deducir-propiedades)
   ?f <- (propiedad_receta (receta ?nombre) (ingrediente ?ing)) ; comprobamos que es un ingrediente
@@ -193,6 +204,10 @@
 ;;;PARTE 2
 ;;;modificar las recetas completando cual seria el/los tipo_plato asociados a una receta, 
 ;;;;;;;; especialmente para el caso de que no incluya ninguno
+;usamos modify para modificar el template de la receta y asi completar los tipos de platos
+;de hecho, algunos ya tienen su tipo de plato pero se le añadirá alguno mas si se ve conveniente
+;por ejemplo, yo no veo mucha diferencia entre postre y desayuno_merienda, entonces, muchas recetas que sean
+;del tipo postre, pueden aniadirse tambien al tipo desayuno_merienda
 
 ;he pensado en clasificar ingredientes caracteristicos
 ;si tiene carne o pescado es un plato principal
@@ -211,6 +226,8 @@
 
 
 ;;he pensado que todo lo que tenga pan a secas sea acompañamiento
+;esto obviamente puede fallar ya que hay platos que tienen pan que no son acompaniamento
+;pero no quiero caer en el sobreajuste y yo creo que es lo mas logico cuando piensa una persona en acompaniamento
 (defrule deducir-acompanamiento
   (modulo deducir-propiedades)
   ?r <- (receta (nombre ?nombre) (tipo_plato $?tipo&:(not (member$ acompanamiento ?tipo))) (ingredientes $?ings))
@@ -246,6 +263,9 @@
 )
 
 ;;para la categoria de postre pongo que si tiene un ingrediente dulce
+;al igual que antes, esto es bastante probable que clasifique una receta que se le echa azucar como postre
+;porque hay recetas que tienen azucar y no son postres. Sin embargo, es lo mas logico y creo que lo mas general
+;para los postres
 (defrule deducir-postre-por-dulces
   (modulo deducir-propiedades)
   ?r <- (receta (nombre ?nombre) (ingredientes $?ings) (tipo_plato $?tipo&:(not (member$ postre ?tipo))))
@@ -275,6 +295,10 @@
 ;;; PARTE 3
 ;;; si una receta es: vegana, vegetariana, de dieta, picante, sin gluten o sin lactosa
 ;;una receta vegana no tiene lacteos, ni huevos, ni carne, ni pescado
+;nos centramos en los alimentos que no pueden tener ciertas propiedades
+;miramos si los tienen. Si los tienen se clasifica como que no cumple esa propiedad y despues se hace el not
+
+;;una receta vegana no tiene lacteos, ni huevos, ni carne, ni pescado
 (defrule receta-no-vegana
    (declare (salience -4)) 
    (modulo deducir-propiedades)
@@ -290,7 +314,7 @@
   ;(printout t ?n " no es vegana " crlf)
 )
 
-;hacemos el not de la anterior y añadimos que en el nombre de la receta no ponga carne/pescado
+;hacemos el not de la anterior para clasificar como vegana (no contiene esos alimentos)
 (defrule receta-vegana
    (declare (salience -5))
    (modulo deducir-propiedades)
@@ -302,7 +326,7 @@
 )
 
 
-;;una receta vegetariana es que no tiene pescado ni carne pero si puede tener lacteos o huevos
+;;una receta vegetariana es que no tiene pescado ni carne (embutidos, fiambres...) pero si puede tener lacteos o huevos
 (defrule receta-no-vegetariana
    (declare (salience -6)) 
    (modulo deducir-propiedades)
@@ -316,6 +340,7 @@
   ;(printout t ?n " no es vegetariano " crlf)
 )
 
+;hacemos el not de la anterior
 (defrule receta-vegetariana
    (declare (salience -7))
    (modulo deducir-propiedades)
@@ -328,7 +353,7 @@
 
 
 
-;;sin gluten es que no tenga ni harina ni trigo
+;;sin gluten es que no tenga ni harina ni trigo ni sus derivados
 (defrule receta-gluten
    (declare (salience -10))
    (modulo deducir-propiedades)
@@ -339,6 +364,7 @@
    (assert (propiedad_receta (tipo es_con_gluten) (receta ?n)))
 )
 
+;hacemos el not de la anterior
 (defrule receta-no-gluten
    (declare (salience -11))
    (modulo deducir-propiedades)
@@ -361,6 +387,7 @@
    (assert (propiedad_receta (tipo es_con_lactosa) (receta ?n)))
 )
 
+;hacemos el not de la anterior
 (defrule receta-no-lactosa
    (declare (salience -13))
    (modulo deducir-propiedades)
@@ -372,7 +399,7 @@
 )
 
 
-;; si es picante en el nombre deberia de poner picante o en un ingrediente
+;; si es picante en el nombre deberia de poner picante en el titulo de la receta
 (defrule receta-picante
   (declare (salience -14))
   (modulo deducir-propiedades)
@@ -398,18 +425,10 @@
   ;(printout t "La receta " ?n " es de dieta (pocas calorias)." crlf)
 )
 
+;quitamos la interaccion con el usuario aqui porque la vamos a hacer en el modulo correspondiente dependiendo de si es salida o entrada de datos
 
-;;;FORMATO DE LOS HECHOS: 
-;  
-;       (propiedad_receta ingrediente_relevante ?r ?a)
-;       (propiedad_receta es_vegetariana ?r) 
-;       (propiedad_receta es_vegana ?r)
-;       (propiedad_receta es_sin_gluten ?r)
-;       (propiedad_receta es_picante ?r)
-;       (propiedad_receta es_sin_lactosa ?r)
-;       (propiedad_receta es_de_dieta ?r)
-
-;; fin de módulo
+;; fin de módulo 
+;retractamos el modulo e insertamos el siguiente
 (defrule fin-deducir-propiedades
    (declare (salience -5000)) 
    ?f <- (modulo deducir-propiedades)

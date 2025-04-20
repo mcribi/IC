@@ -452,24 +452,6 @@
 
 
 (receta
-    (nombre "Tajine de conejo")
-    (introducido_por "Rodrigo Gonzalez Marcet")
-    (numero_personas 4)
-    (ingredientes conejo ajo ciruela_pasa azafran canela_en_rama miel caldo_de_verduras cebolla almendra_tostada comino)
-   (dificultad baja)
-   (duracion 30m)
-   (enlace https://www.recetasgratis.net/receta-de-tajine-de-conejo-32189.html)
-   (tipo_plato plato_principal)
-   (Calorias 762)
-   (Proteinas 32)
-   (Grasa 32)
-   (Carbohidratos 0)
-   (Fibra 1)
-   (Colesterol 78)
-)
-
-
-(receta
     (nombre "Camarones al curry")
     (introducido_por "Leon Elliott Fuller")
     (numero_personas 4)

@@ -1,6 +1,21 @@
 ;;MODULO PARA PEDIR INFORMACION AL USUARIO
-;importamos el main
+;importamos todo lo del main y definimos el modulo actual. Con el export all hace que lo definido en este modulo este disponible para los demas modulos
+;asi puede ser usado tambien desde fuera
 (defmodule PEDIR (export ?ALL) (import MAIN ?ALL))
+
+;;;;;;;;;;;;;;;;;;;;EXPLICACON MODULO;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;PEDIR: este modulo se encarga de recopilar informacion que le pide al usuario, verifica la entrada y si no interpreta que no quiere restriccion e inserta las preferencias del usuario como hechos
+;creo que para empezar lo mejor es preguntarle lo esencial al usuario: tipo de plato y propiedad especial
+;esto hara que sea SENCILLA Y COMODA LA ENTRADA para el usuario responder lo que quiere
+; de hecho, ADMITE SIEMPRE RESPUESTAS PARCIALES ya que si no quiere tener ninguna restriccion o 
+; quiere que sea cualquier plato puede no responder nada y este modulo lo interpretara que no tiene ninguna
+; restriccion o que le da igual el tipo de plato (puede no escribir o escribir cualquier cosa que no sea una opcion)
+; esto hace que la ENTRADA SEA NATURAL, NO TEDIOSA NI DE FORMA MECANICA
+; ya que primero solo preguntamos esas dos cosas (y puede si quiere ni escribirlas para que sea mas libre) y se recomendara una receta acorde a eso
+; sera despues de recomendarla cuando se le preguntara si le ha gustado y caracteristicas mas especificas a cambiar
+; es la forma mas natural y que hariamos las persona, no preguntar todo de golpe, si no ir de los principal a lo especifico
+; asi conseguimos que solo se realicen las preguntas oportunas en cada momento y de acuerdo a cada caso
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 ;regla para iniciar el modulo y meter un hecho que sea el modulo
 ;en las demas reglas del modulo tenemos en el antecedente el hecho de este modulo
@@ -19,7 +34,7 @@
    =>
    (printout t "¿Qué tipo de plato buscas? (entrante, primer_plato, plato_principal, postre, desayuno_merienda, acompanamiento): ")
    (bind ?input (readline))
-   (bind ?tipo (sym-cat ?input)) ; ← conversión correcta en CLIPS
+   (bind ?tipo (sym-cat ?input)) 
    (if (member$ ?tipo (create$ entrante primer_plato plato_principal postre desayuno_merienda acompanamiento)) then
       (assert (preferencia-plato (tipo ?tipo)))
    else

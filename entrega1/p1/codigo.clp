@@ -1,8 +1,14 @@
+;Práctica 1
+;María Cribillés Pérez	
+
 ;;;;; SISTEMA BASADO EN EL CONOCIMIENTO PARA RECOMENDAR LA CANTIDAD A TOMAR DE UN ALIMENTO  ;;;;;
                   ;;;;; PARA MANTENER UNA DIETA CARDIOSALUDABLE ;;;;;;;;;
-				
+			
 ;;; Fuente de conocimiento: https://fundaciondelcorazon.com/nutricion/piramide-de-alimentacion.html				
-				  
+
+;;;; Descripción: Este sistema pregunta por un alimento y recomienda una cantidad saludable según
+;;;; la pirámide alimentaria, mostrando además alimentos parecidos en nivel y propiedades.
+
 
 ;;;ENTRADAS;;;
 ;;;; (alimento ?a) representará ?a es el alimento sobre el que se pide información
@@ -20,6 +26,7 @@
 ; por ejemplo, "la pasta en un alimento rico en hidratos de carbono" se representará (propiedad rico_en_hidratos pasta si)
 ; se introducen algunos, otros se deducen
 
+;Nivel en la pirámide alimentaria para distintos grupos de alimentos
 (deffacts piramide_alimentaria
 (nivel_piramide_alimentaria verdura 1)
 (nivel_piramide_alimentaria hortalizas 1)
@@ -40,7 +47,7 @@
 (nivel_piramide_alimentaria dulces 9)
 )
 
-
+;Relaciones de jerarquis: subtipos
 (deffacts subtipos
 (es_un_tipo_de carne_roja carne)
 (es_un_tipo_de ternera carne_roja)
@@ -90,7 +97,7 @@
 (es_un_tipo_de azucar dulces)
 )
 
-
+;Cantidades recomendadas segun el nivel que estemos de la piramide
 (deffacts cantidad_recomendada
 (cantidad_recomendada nivel 1 "en raciones de 120-150 gramos" "3-4 veces al dia")
 (cantidad_recomendada nivel 2 "en raciones de 150-200 gramos" "2-3 veces al dia")
@@ -103,12 +110,15 @@
 (cantidad_recomendada nivel 9 "" "de forma esporadica")
 )
 
+;Composicion de algunos alimentos
 (deffacts hecho_de
 (compuesto_fundamentalmente_por pan harina)
 (compuesto_fundamentalmente_por pasta harina)
 (compuesto_fundamentalmente_por pizza harina)
 )
 
+;;;;;Reglas de inferencia
+;Transitividad 
 (defrule componiendo_es_un_tipo_de
 (es_un_tipo_de ?x ?y)
 (es_un_tipo_de ?y ?z)
@@ -116,13 +126,14 @@
 (assert (es_un_tipo_de ?x ?z))
 )
 
+;Clasficacion por composicion
 (defrule compuesto_fundamentalmente_por_entonces_es_un_tipo_de
 (compuesto_fundamentalmente_por ?x ?y)
 =>
 (assert (es_un_tipo_de ?x ?y))
 )
 
-
+;Clasfica un alimento en su nivel 
 (defrule indicar_nivel_grupo
 (alimento ?a)
 (nivel_piramide_alimentaria ?a ?n)
@@ -131,6 +142,7 @@
 (assert (nivel ?n))
 )
 
+;muestra su nivel
 (defrule indicar_nivel_por_tipo
 (alimento ?a)
 (es_un_tipo_de ?a ?x)
@@ -140,6 +152,7 @@
 (assert (nivel ?n))
 )
 
+;muestra clasificacion por composicion
 (defrule indicar_compuesto_fundamentalmente_por
 (declare (salience 2))
 (alimento ?a)
@@ -148,6 +161,7 @@
 (printout t crlf "Esta compuesto fundamentalmente por " ?b ", asi que lo clasificaremos como este alimento" crlf)
 )
 
+;recomendaciones especificas de ciertos alimentos
 (defrule recomendar_cereales_siempre_integrales
 (alimento ?a)
 (es_un_tipo_de ?a cereales)
@@ -174,6 +188,7 @@
 (printout t crlf crlf "Se recomienda que los lacteos se tomen desnatados o semidesnatados")
 )
 
+;imprime todos los alimentos de un mismo nivel de la piramide
 (defrule describir_nivel
 (nivel ?n)
 (nivel_piramide_alimentaria ?a ?n)
@@ -181,7 +196,7 @@
 (printout t "- " ?a "   ")
 )
 
-
+;recomendacion final
 (defrule indicar_cantidad_recomendada
 (declare (salience -1))
 (nivel ?n)
@@ -190,6 +205,7 @@
 (printout t crlf crlf "Para el conjunto de los alimentos de este nivel se recomienda consumirlos " ?t1 " " ?t2 crlf crlf)
 )
 
+;pregunta al usuario
 (defrule preguntar_alimento
 =>
 (printout t crlf "Indica el alimento del que deseas saber la cantidad recomendada: " )
@@ -197,6 +213,7 @@
 )
 
 ;;;;;;;; AMPLIANDO EL SISTEMA ;;;;;;;
+;propiedades nutricionales por grupo
 (deffacts rico_en_proteinas
 (propiedad rico_en_proteinas carne si)
 (propiedad rico_en_proteinas pescado si)
@@ -229,6 +246,7 @@
 (propiedad rico_en_azucares fruta si)
 )
 
+;herencia de propiedades por jerarquia
 (defrule herencia_propiedades
 (propiedad ?p ?a ?v)
 (es_un_tipo_de ?x ?a)
@@ -236,6 +254,7 @@
 (assert (propiedad ?p ?x ?v))
 )
 
+;justificacion por propiedades
 (defrule indicar_propiedad_por_tipo
 (declare (salience -1))
 (alimento ?a)
@@ -250,7 +269,7 @@
 ;;; Indicaciones: 1) deduce hechos (es_alimento ?x) representando que algo es un alimento a partir de la relacion "es_un_tipo_de"
 ;;;               2) Imprime por pantalla los es_alimento
 
-; Primero creamos una propiedad llamada es_alimento donde si x es un tipo de y e y ya es un alimento, entonces x es tambien un alimento
+;Primero creamos una propiedad llamada es_alimento donde si x es un tipo de y e y ya es un alimento, entonces x es tambien un alimento
 (defrule deducir_alimentos
 (es_un_tipo_de ?x ?)
 =>
@@ -274,7 +293,7 @@
 (printout t crlf "Alimentos con información disponibles: " crlf)
 (assert (listar_alimentos)))
 
-;; Regla para imprimir cada alimento. Cuando tengamos el antecedente es_alimento porque se ha disparado su regla correspondiente de deducir_alimentos y la regla anterior que nos da el hecho temporal lista_alimentos se dispara esta regla
+;;Regla para imprimir cada alimento. Cuando tengamos el antecedente es_alimento porque se ha disparado su regla correspondiente de deducir_alimentos y la regla anterior que nos da el hecho temporal lista_alimentos se dispara esta regla
 ;Cada vez que es imprimido, se retracta para que no haya duplicados
 ;En vez de retractar con numeros, almacenamos el identificador del hecho a la variable ?f
 (defrule imprimir_alimento 
@@ -292,7 +311,7 @@
 ;;;               3) Imprime por pantalla los alimento_parecido que queden 
 
 ;aniadimos una regla para deducir los alimentos del mismo nivel de la piramide
-; Necesitamos en el antecedente: el alimento preguntado, el nivel donde se encuentra, otros alimentos del mismo nivel y no incluir el propio elemento
+;Necesitamos en el antecedente: el alimento preguntado, el nivel donde se encuentra, otros alimentos del mismo nivel y no incluir el propio elemento
 (defrule deducir_alimentos_parecidos
 (alimento ?a)  ; alimento por el que han hecho la consulta
 (es_alimento ?x)  ;es un alimento
