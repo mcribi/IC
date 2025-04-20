@@ -1,3 +1,6 @@
+;Practica 3
+;María Cribillés Pérez
+
 ;;MODULO PARA PEDIR INFORMACION AL USUARIO
 ;importamos todo lo del main y definimos el modulo actual. Con el export all hace que lo definido en este modulo este disponible para los demas modulos
 ;asi puede ser usado tambien desde fuera

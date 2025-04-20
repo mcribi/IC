@@ -1,3 +1,6 @@
+;Practica 3
+;María Cribillés Pérez
+
 ;Este archivo es el ejecutable donde carga todos los modulos y definimos las cosas en comun de todo el proyecto
 ;He diseniado un sistema basado en el conocimiento (Qué cocino hoy) para aconsejar a un usuario una receta de acuerdo a algunas restricciones
 ;El sistema cargará las recetas del fichero recetas.txt (igual que en la practica 2)

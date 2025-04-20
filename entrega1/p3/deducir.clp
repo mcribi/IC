@@ -1,3 +1,6 @@
+;Practica 3
+;María Cribillés Pérez
+
 ;;MODULO PARA DEDUCIR PROPIEDADES A PARTIR DEL CONOCIMIENTO
 ;importamos todo lo del main y definimos el modulo actual. Con el export all hace que lo definido en este modulo este disponible para los demas modulos
 ;asi puede ser usado tambien desde fuera
