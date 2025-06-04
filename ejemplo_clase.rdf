@@ -1,0 +1,360 @@
+<?xml version="1.0"?>
+<rdf:RDF xmlns="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2/"
+     xml:base="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2/"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:xml="http://www.w3.org/XML/1998/namespace"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:untitled-ontology-2="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#">
+    <owl:Ontology rdf:about="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2"/>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Object Properties
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#tiene_base -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#tiene_base">
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#pizza"/>
+        <rdfs:range rdf:resource="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#base"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#tiene_ingrediente -->
+
+    <owl:ObjectProperty rdf:about="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#tiene_ingrediente">
+        <rdfs:domain rdf:resource="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#pizza"/>
+        <rdfs:range rdf:resource="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#ingrediente"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Classes
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#aceituna -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#aceituna">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#vegetal"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#base -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#base"/>
+    
+
+
+    <!-- http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#carne -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#carne">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#ingrediente"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#embutido -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#embutido">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#carne"/>
+        <owl:disjointWith rdf:resource="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#otras_carnes"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#ingrediente -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#ingrediente"/>
+    
+
+
+    <!-- http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#otras_carnes -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#otras_carnes">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#carne"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#pescado -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#pescado">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#ingrediente"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#pescado_azul -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#pescado_azul">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#pescado"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#pescado_blanco -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#pescado_blanco">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#pescado"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#pimiento -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#pimiento">
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:unionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#pimiento_rojo"/>
+                    <rdf:Description rdf:about="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#pimiento_verde"/>
+                </owl:unionOf>
+            </owl:Class>
+        </owl:equivalentClass>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#pimiento_rojo -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#pimiento_rojo">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#vegetal"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#pimiento_verde -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#pimiento_verde">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#vegetal"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#pizza -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#pizza"/>
+    
+
+
+    <!-- http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#pizza_vegetal -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#pizza_vegetal">
+        <owl:equivalentClass>
+            <owl:Class>
+                <owl:intersectionOf rdf:parseType="Collection">
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#tiene_base"/>
+                        <owl:someValuesFrom rdf:resource="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#base"/>
+                    </owl:Restriction>
+                    <owl:Restriction>
+                        <owl:onProperty rdf:resource="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#tiene_ingrediente"/>
+                        <owl:allValuesFrom>
+                            <owl:Class>
+                                <owl:unionOf rdf:parseType="Collection">
+                                    <rdf:Description rdf:about="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#queso"/>
+                                    <rdf:Description rdf:about="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#vegetal"/>
+                                </owl:unionOf>
+                            </owl:Class>
+                        </owl:allValuesFrom>
+                    </owl:Restriction>
+                </owl:intersectionOf>
+            </owl:Class>
+        </owl:equivalentClass>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#queso -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#queso">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#ingrediente"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#tomate -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#tomate">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#vegetal"/>
+    </owl:Class>
+    
+
+
+    <!-- http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#vegetal -->
+
+    <owl:Class rdf:about="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#vegetal">
+        <rdfs:subClassOf rdf:resource="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#ingrediente"/>
+    </owl:Class>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // Individuals
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    
+
+
+    <!-- http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#Aceituna_negra -->
+
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#Aceituna_negra">
+        <rdf:type rdf:resource="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#aceituna"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#Aceituna_verde -->
+
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#Aceituna_verde">
+        <rdf:type rdf:resource="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#aceituna"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#Base_fina -->
+
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#Base_fina">
+        <rdf:type rdf:resource="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#base"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#Base_integral -->
+
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#Base_integral">
+        <rdf:type rdf:resource="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#base"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#Base_normal -->
+
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#Base_normal">
+        <rdf:type rdf:resource="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#base"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#Gouda -->
+
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#Gouda">
+        <rdf:type rdf:resource="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#queso"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#Margarita -->
+
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#Margarita">
+        <rdf:type rdf:resource="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#pizza"/>
+        <rdf:type>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#tiene_ingrediente"/>
+                <owl:cardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">2</owl:cardinality>
+            </owl:Restriction>
+        </rdf:type>
+        <untitled-ontology-2:tiene_base rdf:resource="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#Base_normal"/>
+        <untitled-ontology-2:tiene_ingrediente rdf:resource="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#Mozzarella"/>
+        <untitled-ontology-2:tiene_ingrediente rdf:resource="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#Tomate_frito"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#Mozzarella -->
+
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#Mozzarella">
+        <rdf:type rdf:resource="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#queso"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#Queso_azul -->
+
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#Queso_azul">
+        <rdf:type rdf:resource="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#queso"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#Tomate_frito -->
+
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#Tomate_frito">
+        <rdf:type rdf:resource="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#tomate"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#Tomate_natural -->
+
+    <owl:NamedIndividual rdf:about="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#Tomate_natural">
+        <rdf:type rdf:resource="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#tomate"/>
+    </owl:NamedIndividual>
+    
+
+
+    <!-- 
+    ///////////////////////////////////////////////////////////////////////////////////////
+    //
+    // General axioms
+    //
+    ///////////////////////////////////////////////////////////////////////////////////////
+     -->
+
+    <rdf:Description>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#AllDisjointClasses"/>
+        <owl:members rdf:parseType="Collection">
+            <rdf:Description rdf:about="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#aceituna"/>
+            <rdf:Description rdf:about="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#pimiento_rojo"/>
+            <rdf:Description rdf:about="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#pimiento_verde"/>
+            <rdf:Description rdf:about="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#tomate"/>
+        </owl:members>
+    </rdf:Description>
+    <rdf:Description>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#AllDisjointClasses"/>
+        <owl:members rdf:parseType="Collection">
+            <rdf:Description rdf:about="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#base"/>
+            <rdf:Description rdf:about="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#ingrediente"/>
+            <rdf:Description rdf:about="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#pizza"/>
+        </owl:members>
+    </rdf:Description>
+    <rdf:Description>
+        <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#AllDisjointClasses"/>
+        <owl:members rdf:parseType="Collection">
+            <rdf:Description rdf:about="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#carne"/>
+            <rdf:Description rdf:about="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#pescado"/>
+            <rdf:Description rdf:about="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#queso"/>
+            <rdf:Description rdf:about="http://www.semanticweb.org/maria-cribilles/ontologies/2025/3/untitled-ontology-2#vegetal"/>
+        </owl:members>
+    </rdf:Description>
+</rdf:RDF>
+
+
+
+<!-- Generated by the OWL API (version 4.5.29.2024-05-13T12:11:03Z) https://github.com/owlcs/owlapi -->
+
