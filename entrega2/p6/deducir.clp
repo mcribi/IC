@@ -1,10 +1,13 @@
-;Practica 6
+;Practica 6: se aniade justificaciones de por que es saludable y por que se ha elegido la receta correspondiente
 ;María Cribillés Pérez
 
 ;;MODULO PARA DEDUCIR PROPIEDADES A PARTIR DEL CONOCIMIENTO
 ;importamos todo lo del main y definimos el modulo actual. Con el export all hace que lo definido en este modulo este disponible para los demas modulos
 ;asi puede ser usado tambien desde fuera
-;;;;;;ES IGUAL QUE LA PRACTICA 2 (sin la interacion final del usuario->aqui se hace en el modulo correspondiente)
+;;;;;;se basa en la practica 2 (no tiene la interacion final del usuario->aqui se hace en el modulo correspondiente)
+
+;;; ANIADIENDO FACTORES DE CERTEZA->PRACTICA 6
+;para ello, como el termino saludable puede ser un poco ambiguo, he ido creando ciertas propiedades que restaban o sumaban puntos de certeza
 
 
 (defmodule deducir-propiedades (export ?ALL) (import MAIN ?ALL))
@@ -26,6 +29,9 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;PRACTICA 6;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;ahora vamos a hacer varias reglas para deducir si una receta es saludable o no
+
+;si tiene verduras saludable suma 0.5 en positivo a que sea saludable, es bastante probable que sea saludable si tiene verduras
 (defrule verdura-suma-saludable
   (modulo deducir-propiedades)
   (receta (nombre ?r) (ingredientes $?ingredientes))
@@ -43,99 +49,120 @@
             (member$ esparragos $?ingredientes)))
   =>
   (assert (factor-certeza (propiedad saludable) (receta ?r) (valor 0.5)))
+  (assert (justificacion (propiedad saludable) (receta ?r) (texto "Contiene verduras saludables."))) ; se aniade justificacion que despues sera mostrada para explicar por que es saludable o no
 )
 
-
+;si esta hecho al horno 0.4 en positivo a que sea saludable
 (defrule horno-suma-saludable
   (modulo deducir-propiedades)
   (receta (nombre ?r) (tipo_copcion al_horno))
   =>
   (assert (factor-certeza (propiedad saludable) (receta ?r) (valor 0.4)))
+  (assert (justificacion (propiedad saludable) (receta ?r) (texto "El tipo de coccion es al horno, lo cual suele ser bueno para la salud.")))
 )
 
+;si esta hecho al vapor 0.5 en positivo a que sea saludable
 (defrule vapor-suma-saludable
   (modulo deducir-propiedades)
   (receta (nombre ?r) (tipo_copcion al_vapor))
   =>
   (assert (factor-certeza (propiedad saludable) (receta ?r) (valor 0.5)))
+  (assert (justificacion (propiedad saludable) (receta ?r) (texto "El tipo de coccion es al vapor, lo cual suele ser bueno para la salud.")))
 )
 
+;si esta frito quita 0.6 ya que no es bueno para la salud
 (defrule frito-resta-saludable
   (modulo deducir-propiedades)
   (receta (nombre ?r) (tipo_copcion frito))
   =>
   (assert (factor-certeza (propiedad saludable) (receta ?r) (valor -0.6)))
+  (assert (justificacion (propiedad saludable) (receta ?r) (texto "El tipo de coccion es al frito, lo cual no es bueno para la salud.")))
 )
 
+;si tiene mucha grasa quita 0.4 ya que no es bueno para la salud
 (defrule grasa-resta-saludable
   (modulo deducir-propiedades)
   (receta (nombre ?r) (Grasa ?g))
   (test (> ?g 50))
   =>
   (assert (factor-certeza (propiedad saludable) (receta ?r) (valor -0.4)))
+  (assert (justificacion (propiedad saludable) (receta ?r) (texto "Tiene mucha grasa, no se deberia de comer mucha.")))
 )
 
+;si tiene mucha fibra suma 0.3 ya que es bueno para la salud
 (defrule fibra-suma-saludable
   (modulo deducir-propiedades)
   (receta (nombre ?r) (Fibra ?f))
   (test (> ?f 5))
   =>
   (assert (factor-certeza (propiedad saludable) (receta ?r) (valor 0.3)))
+  (assert (justificacion (propiedad saludable) (receta ?r) (texto "Tiene mucha fibra, eso es saludable.")))
 )
 
+;si tiene pocas calorias suma 0.4 ya que es bueno para la salud
 (defrule bajas-calorias-suma-saludable
   (modulo deducir-propiedades)
   (receta (nombre ?r) (Calorias ?c))
   (test (< ?c 200))
   =>
   (assert (factor-certeza (propiedad saludable) (receta ?r) (valor 0.4)))
+  (assert (justificacion (propiedad saludable) (receta ?r) (texto "Es baja en calorias, eso es saludable.")))
 )
 
+;si tiene muchas proteinas suma 0.2 ya que es bueno para la salud
 (defrule proteinas-moderadas-suma-saludable
   (modulo deducir-propiedades)
   (receta (nombre ?r) (Proteinas ?p))
   (test (and (>= ?p 10) (<= ?p 30)))
   =>
   (assert (factor-certeza (propiedad saludable) (receta ?r) (valor 0.2)))
+  (assert (justificacion (propiedad saludable) (receta ?r) (texto "Es alta en proteinas, eso es saludable.")))
 )
 
+;si tiene ingredientes integrales suma 0.3 ya que es bueno para la salud y son mejores que los no integrales
 (defrule integrales-suman-saludable
   (modulo deducir-propiedades)
   (receta (nombre ?r) (ingredientes $?ings))
   (test (or (member$ pan_integral ?ings) (member$ arroz_integral ?ings) (member$ avena ?ings)))
   =>
   (assert (factor-certeza (propiedad saludable) (receta ?r) (valor 0.3)))
+  (assert (justificacion (propiedad saludable) (receta ?r) (texto  "Es integral, eso es saludable.")))
 )
 
-
+;si tiene mucho colesterol resta 0.3 ya que no es bueno para la salud
 (defrule colesterol-resta-saludable
   (modulo deducir-propiedades)
   (receta (nombre ?r) (Colesterol ?c))
   (test (> ?c 200))
   =>
   (assert (factor-certeza (propiedad saludable) (receta ?r) (valor -0.3)))
+  (assert (resumen-saludable ?r "Es alta en colesterol, eso no es saludable."))
 )
 
+;si tiene productos preprocesados resta 0.4
 (defrule procesados-restan-saludable
   (modulo deducir-propiedades)
   (receta (nombre ?r) (ingredientes $?ings))
   (test (or (member$ salchichas ?ings) (member$ mayonesa ?ings)))
   =>
   (assert (factor-certeza (propiedad saludable) (receta ?r) (valor -0.4)))
+  (assert (justificacion (propiedad saludable) (receta ?r) (texto "Lleva preprocesados, intenta evitarlos.")))
 )
 
+;si tiene azucar resta 0.3
 (defrule azucar-resta-saludable
   (modulo deducir-propiedades)
   (receta (nombre ?r) (ingredientes $?ings))
   (test (member$ azucar ?ings))
   =>
   (assert (factor-certeza (propiedad saludable) (receta ?r) (valor -0.3)))
+  (assert (justificacion (propiedad saludable) (receta ?r) (texto "Lleva azucar, no deberias de tomar.")))
 )
 
-
-
-
-
+;Combina dos factores de certeza usando una formula estándar basada en logica difusa:
+;Si ambos son positivos: combinacion no lineal (suma menos producto).
+;Si ambos son negativos: suma con penalizacion.
+;Si tienen signos opuestos: usa una media ponderada especial.
 (deffunction combinacion (?cf1 ?cf2)
   (if (and (> ?cf1 0) (> ?cf2 0))
     then (bind ?rv (- (+ ?cf1 ?cf2) (* ?cf1 ?cf2)))
@@ -146,6 +173,10 @@
   ?rv
 )
 
+;Combina dos hechos factor-certeza distintos para la misma receta saludable:
+;Se eliminan los dos factores originales (retract).
+;Se crea uno nuevo con el valor combinado (assert).
+;Así se acumula evidencia.
 (defrule combinar-factores
   (modulo deducir-propiedades)
   ?f1 <- (factor-certeza (propiedad saludable) (receta ?r) (valor ?cf1))
@@ -158,13 +189,8 @@
                           (valor (combinacion ?cf1 ?cf2))))
 )
 
-(defrule justifica-saludable
-  (modulo deducir-propiedades)
-  (factor-certeza (propiedad saludable) (receta ?r) (valor ?cf))
-  =>
-  (assert (justificacion saludable ?r ?cf))
-)
-
+;Si no hay ningun factor-certeza aun para una receta:
+;Inicializa el valor con 0.0 para evitar errores en combinaciones posteriores.
 (defrule inicializar-factor-certeza-saludable
   (modulo deducir-propiedades)
   (receta (nombre ?r))
@@ -175,8 +201,8 @@
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
+;;entrega 1:
+;;;;;;;;;;;;,,
 
 (defrule carga_recetas
 (declare (salience 1000))

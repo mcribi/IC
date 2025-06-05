@@ -1,4 +1,4 @@
-;Practica 3
+;Practica 6: en este modulo no se aniade nada con respecto a la entrega anterior
 ;María Cribillés Pérez
 
 ;;MODULO PARA PEDIR INFORMACION AL USUARIO

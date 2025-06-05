@@ -1,4 +1,4 @@
-;Practica 6
+;Practica 6: en este modulo se ha aniadido factores de certeza y justificacion y explicaciones de por que una receta es saludable o no
 ;María Cribillés Pérez
 
 ;;MODULO PARA PROPONER RECETA COMPATIBLE Y CAMBIAR CARACTERISTICAS ESPECIFICAS QUE NO LE GUSTAN AL USUARIO
@@ -24,15 +24,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;PRACTICA 6;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
-
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;regla para aniadir el modulo actual para que se puedan disparar las siguiente reglas de este modulo
 (defrule iniciar-propuesta
    =>
@@ -56,6 +47,7 @@
    (assert (receta-seleccionada (nombre ?seleccionada)))
 )
 
+;;;;;;;;;;;;;;;;;;;;;practica6;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;,,
 ;;mostrar receta si es saludable
 (defrule mostrar-receta-seleccionada-saludable
    (modulo proponer-receta)
@@ -75,12 +67,28 @@
    (printout t crlf)
 )
 
+;mostramos las explicaciones finales
+(defrule mostrar-justificaciones-salud
+   (modulo proponer-receta)
+   (receta-seleccionada (nombre ?n))
+   (factor-certeza (propiedad saludable) (receta ?n) (valor ?cf))
+   (not (justificacion-mostrada ?n))
+   =>
+   (printout t crlf ">>> Justificación de salud para la receta *** " ?n " ***" crlf)
+   (do-for-all-facts ((?j justificacion)) 
+      (and (eq ?j:propiedad saludable) (eq ?j:receta ?n))
+      (printout t " - " ?j:texto crlf))
+   (printout t "→ Esta receta se considera saludable con un factor de certeza de " ?cf crlf crlf)
+   (assert (justificacion-mostrada ?n))
+)
+
 
 ;;mostramos la receta seleccionada con justificación (ingredientes y propiedades)
 (defrule mostrar-receta-seleccionada
    (modulo proponer-receta)
    (receta-seleccionada (nombre ?n))
    (receta (nombre ?n) (tipo_plato $?tipo) (ingredientes $?ings))
+   (not (factor-certeza (propiedad saludable) (receta ?n) (valor ?v)))
    =>
    (printout t crlf "Te recomendamos la receta: *** " ?n " ***" crlf)
    (printout t "Tipo de plato: " ?tipo crlf)

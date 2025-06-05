@@ -1,4 +1,4 @@
-;Practica 3
+;Practica 6: en este modulo no se ha modificado nada con respecto a la entrega anterior
 ;María Cribillés Pérez
 
 ;;MODULO PARA OBTENER LAS RECETAS COMPATIBLES SEGUN LAS RESTRICCIONES DEL USUARIO

@@ -1,4 +1,4 @@
-;Practica 3
+;Practica 6: aniado explicaciones del razonamiento, razonamiento por defecto y factores de certeza->al final del archivo
 ;María Cribillés Pérez
 
 ;Este archivo es el ejecutable donde carga todos los modulos y definimos las cosas en comun de todo el proyecto
@@ -20,7 +20,6 @@
 ; asi en bucle hasta que no queden mas recetas a recomendar o hasta que el usuario le guste la receta
 ; 5. MAIN: define los template generales, controla el flujo entre los modulos, incializa el sistema saludando al usuario y activa el primer modulo 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 
 ;definimos el modulo main
 (defmodule MAIN (export ?ALL))
@@ -48,6 +47,17 @@
 (slot Fibra) ; calculado necesario
 (slot Colesterol) ; calculado necesario
 )
+
+;aniadimos una plantilla para guardar la justificacion de por que es saludable
+(deftemplate justificacion
+  (slot propiedad)
+  (slot receta)
+  (slot texto))
+  
+
+;plantilla para controlar el modo del sistema
+(deftemplate modo
+   (slot valor))
 
 ;plantilla propiedad receta
 (deftemplate propiedad_receta
@@ -101,11 +111,11 @@
 )
 
 
-;vamos a anidir de razonamiento con incertidumbre: factores de certeza
+;vamos a aniadir de razonamiento con incertidumbre: factores de certeza
 (deftemplate factor-certeza
   (slot propiedad)
   (slot receta)
-  (slot valor)  ;; Valor entre -1.0 y 1.0
+  (slot valor)  ;valor entre -1.0 y 1.0
 )
 
 
@@ -430,3 +440,110 @@
 )
 
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;PRACTICA 6;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;vamos a insertar una receta por defecto para introducir razonamiento con incertidumbre
+; Se inserta al comienzo del sistema la receta por defecto y pregunta si le gusta. Activa el modo especial para mostrarla
+
+(defrule insertar-receta-por-defecto
+   (declare (salience 1100))
+   =>
+   (assert (receta ;creamos el hecho con la receta por defecto con sus atributos
+            (nombre receta_por_defecto)
+            (introducido_por "Maria Cribilles")
+            (numero_personas 2)
+            (ingredientes arroz tomate cebolla aceite_de_oliva huevo)
+            (dificultad baja)
+            (duracion 30m)
+            (enlace "https://www.recetasgratis.net/receta-de-arroz-a-la-cubana-facil-y-rapido-72089.html")
+            (tipo_plato plato_principal)
+            (coste bajo)
+            (tipo_copcion cocido)
+            (tipo_cocina mediterranea)
+            (temporada todo_el_anio)
+            (Calorias 53)
+            (Proteinas 13)
+            (Grasa 20)
+            (Carbohidratos 66)
+            (Fibra 2)
+            (Colesterol 10)))
+   (assert (receta-candidata (nombre receta_por_defecto)))
+   (assert (receta-seleccionada (nombre receta_por_defecto)))
+   (assert (modo (valor receta-por-defecto)))) ;activamos el modo de receta por defecto para que el sistema sepa que hay que mostrar primero esa receta antes de preguntar nada
+   ;con esto introducirmos razonamiento por defecto
+
+;regla para mostrar toda la informacion de la receta por defecto al usuario y preguntar si le ha gustado esa receta o prefiere cambiarla
+(defrule mostrar-receta-por-defecto
+   (modo (valor receta-por-defecto))
+   (receta-seleccionada (nombre receta_por_defecto))
+   (receta (nombre receta_por_defecto)
+           (numero_personas ?n)
+           (ingredientes $?ings)
+           (dificultad ?dif)
+           (duracion ?dur)
+           (enlace ?url)
+           (tipo_plato ?tipo)
+           (coste ?coste)
+           (tipo_copcion ?coccion)
+           (tipo_cocina ?cocina)
+           (temporada ?temp)
+           (Calorias ?cal)
+           (Proteinas ?prot)
+           (Grasa ?gras)
+           (Carbohidratos ?carb)
+           (Fibra ?fib)
+           (Colesterol ?col))
+   =>
+   (printout t crlf "Te recomendamos la receta por defecto:" crlf)
+   (printout t "- Tipo de plato: " ?tipo crlf)
+   (printout t "- Ingredientes: " (implode$ ?ings) crlf)
+   (printout t "- Personas: " ?n crlf)
+   (printout t "- Dificultad: " ?dif crlf)
+   (printout t "- Duración: " ?dur crlf)
+   (printout t "- Coste: " ?coste crlf)
+   (printout t "- Tipo de cocción: " ?coccion crlf)
+   (printout t "- Cocina: " ?cocina crlf)
+   (printout t "- Temporada: " ?temp crlf)
+   (printout t "- Calorías: " ?cal crlf)
+   (printout t "- Proteínas: " ?prot crlf)
+   (printout t "- Grasas: " ?gras crlf)
+   (printout t "- Carbohidratos: " ?carb crlf)
+   (printout t "- Fibra: " ?fib crlf)
+   (printout t "- Colesterol: " ?col crlf)
+   (printout t "- Enlace: " ?url crlf)
+   (printout t crlf "¿Te gusta esta receta? (si / no): ")
+   (bind ?respuesta (lowcase (readline))) ;puede ser tanto mayusculas como minusculas
+   (if (eq ?respuesta "si") then
+      (assert (confirmacion_receta (valor si))) ;ha aceptado la receta
+   else
+      (assert (confirmacion_receta (valor no)))))
+
+;se activa para despedirse y terminar el programa si el usuario acepta la receta
+(defrule justificar-receta-por-defecto
+   ?m <- (modo (valor receta-por-defecto))
+   ?c <- (confirmacion_receta (valor si))
+   =>
+   (retract ?c)
+   (retract ?m)
+   (printout t crlf "¡Perfecto! Has aceptado la receta por defecto." crlf)
+   (printout t "Esperamos que la disfrutes. ¡Hasta la próxima!" crlf)
+   (halt)) ;para finalizar la ejecuccion
+
+;si el usuario rechaza la receta se eliminan todos los hechos que tengan que ver con la receta por defecto
+;se activa el flujo normal del programa para que pregunte sus preferencias
+(defrule rechazo-receta-por-defecto
+   ?c <- (confirmacion_receta (valor no))
+   ?m <- (modo (valor receta-por-defecto))
+   ?r1 <- (receta-seleccionada (nombre receta_por_defecto))
+   ?r2 <- (receta-candidata (nombre receta_por_defecto))
+   =>
+   (retract ?c)
+   (retract ?m)
+   (retract ?r1)
+   (retract ?r2)
+   (assert (info-faltante (campo tipo-plato)));par que pregunte por el tipo de plato 
+   (assert (info-faltante (campo propiedad))))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
